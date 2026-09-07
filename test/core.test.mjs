@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createTransport } from '../dist/transport.js';
-import { createLocalContext, readText, detectCommands } from '../dist/local.js';
+import { createLocalContext, readText, detectCommands, readKeychainEntry } from '../dist/local.js';
 import { usageDataSchema } from '../dist/models.js';
 import { safeReason, UsageError } from '../dist/errors.js';
 
@@ -63,4 +63,16 @@ test('credential reads are bounded, read-only, and distinguish malformed files',
   await mkdir(join(home, 'directory'));
   await assert.rejects(readText(join(home, 'directory')), { code: 'credential_read_error' });
   assert.equal(await detectCommands(context, ['nonexistent']), false);
+});
+test('Keychain tries the current account before the legacy lookup, including malformed entries', async () => {
+  const calls = [];
+  const result = await readKeychainEntry('Claude Code-credentials', 'alice', async args => {
+    calls.push(args);
+    return args.includes('-a') ? 'malformed' : '{"valid":true}';
+  }, value => { try { return JSON.parse(value).valid === true; } catch { return false; } });
+  assert.equal(result, '{"valid":true}');
+  assert.deepEqual(calls, [
+    ['find-generic-password', '-s', 'Claude Code-credentials', '-a', 'alice', '-w'],
+    ['find-generic-password', '-s', 'Claude Code-credentials', '-w'],
+  ]);
 });

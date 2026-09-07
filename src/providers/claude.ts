@@ -108,7 +108,9 @@ export const claude: Provider = {
       if (credentials) return credentials;
     } catch (error) { failure = error; }
     if (context.platform === 'darwin') {
-      const raw = await context.keychain('Claude Code-credentials');
+      const raw = await context.keychain('Claude Code-credentials', value => {
+        try { return parseCredentials(JSON.parse(value)) !== null; } catch { return false; }
+      });
       if (raw) {
         try { const credentials = parseCredentials(JSON.parse(raw)); if (credentials) return credentials; }
         catch { failure = new UsageError('invalid_credentials'); }

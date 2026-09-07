@@ -13,7 +13,7 @@ export interface LocalContext {
   platform: NodeJS.Platform;
   readText(path: string): Promise<string | null>;
   readJson(path: string): Promise<unknown | null>;
-  keychain(service: string): Promise<string | null>;
+  keychain(service: string, validate?: (value: string) => boolean): Promise<string | null>;
   sqliteToken(path: string, key: string): Promise<string | null>;
 }
 export async function readText(path: string): Promise<string | null> {
@@ -36,18 +36,24 @@ export async function readText(path: string): Promise<string | null> {
     throw new UsageError('credential_read_error');
   } finally { await file?.close(); }
 }
-async function keychain(service: string): Promise<string | null> {
+export async function readKeychainEntry(service: string, account: string | undefined,
+  run: (args: string[]) => Promise<string>, validate = (_value: string) => true): Promise<string | null> {
+  for (const args of [...(account ? [['-a', account]] : []), []]) {
+    try {
+      const raw = (await run(['find-generic-password', '-s', service, ...args, '-w'])).trim();
+      if (raw && validate(raw)) return raw;
+    } catch { /* Try the legacy service-only lookup after an unavailable or invalid entry. */ }
+  }
+  return null;
+}
+async function keychain(service: string, validate?: (value: string) => boolean): Promise<string | null> {
   if (process.platform !== 'darwin') return null;
   let account: string | undefined;
   try { account = userInfo().username; } catch { /* Try legacy lookup below. */ }
-  for (const args of [ ...(account ? [['-a', account]] : []), [] ]) {
-    try {
-      const { stdout } = await exec('/usr/bin/security', ['find-generic-password', '-s', service, ...args, '-w'],
-        { timeout: 2_000, maxBuffer: 1_048_576 });
-      if (stdout.trim()) return stdout.trim();
-    } catch { /* The service may exist only under the legacy account. */ }
-  }
-  return null;
+  return readKeychainEntry(service, account, async args => {
+    const { stdout } = await exec('/usr/bin/security', args, { timeout: 2_000, maxBuffer: 1_048_576 });
+    return stdout;
+  }, validate);
 }
 async function sqliteToken(path: string, key: string): Promise<string | null> {
   try { await access(path); } catch { return null; }
