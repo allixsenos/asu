@@ -1,4 +1,5 @@
 import { UsageError } from './errors.js';
+import { version } from './version.js';
 
 export interface JsonRequest {
   method?: 'GET' | 'POST';
@@ -17,7 +18,7 @@ export function createTransport(fetcher: typeof fetch = fetch, timeoutMs = 8_000
     try {
       const response = await fetcher(url, {
         method: options.method ?? 'GET',
-        headers: { Accept: 'application/json', 'User-Agent': 'asu/0.1.0',
+        headers: { Accept: 'application/json', 'User-Agent': `asu/${version}`,
           ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }), ...options.headers },
         body: options.body === undefined ? undefined : JSON.stringify(options.body),
         redirect: 'error', signal,
