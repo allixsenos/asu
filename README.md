@@ -12,7 +12,7 @@ ASU needs **Node.js 22.13 or newer**, npm, and Git. Sign in through the provider
 npx --yes github:allixsenos/asu --table
 ```
 
-This repository is **private**. Your Git credentials must give access to `allixsenos/asu`. Released versions are on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. GitHub access installs ASU. Your provider credentials, which are separate, let ASU read usage.
+Released versions are on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. The GitHub URL above installs ASU without a token. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
@@ -30,7 +30,7 @@ npx --yes github:allixsenos/asu --all --table
 
 A Git install builds the TypeScript package through its `prepare` script. The install needs access to the dependency registry and permission to run that script. A GitHub URL needs no npm publication.
 
-If you use SSH for private repositories, give the SSH URL explicitly:
+If you prefer SSH, give the SSH URL explicitly:
 
 ```bash
 npx --yes --package='git+ssh://git@github.com/allixsenos/asu.git#main' asu --table
@@ -425,7 +425,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 
 | Symptom | What to examine |
 | --- | --- |
-| GitHub says the repository is missing or access is denied | The repository is private. Examine your Git access with `git ls-remote git@github.com:allixsenos/asu.git HEAD`, or use your configured HTTPS authentication. |
+| GitHub says the repository is missing or access is denied | Examine your Git access with `git ls-remote https://github.com/allixsenos/asu.git HEAD`. The SSH URL needs a GitHub SSH key. |
 | The Git install fails during `prepare` | Examine the Node version, the dependency-registry access, and whether npm permits build scripts. See the local checkout instructions below. |
 | npm 9 reports `could not determine executable to run` while it prepares a Git install | Use `npm exec --yes --package=github:allixsenos/asu -- asu --table` instead of the `npx` wrapper. |
 | No supported agents or credentials detected | Use `--all`, examine the credential sources above, and examine the home-directory overrides and `PATH`. |
@@ -487,4 +487,4 @@ release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release fr
 
 ## Project status
 
-Private development repository. The package is `UNLICENSED`. The release workflow publishes it only to GitHub Packages, where repository access controls who can install it. Only the owner can decide to make the repository public or to publish to the public npm registry.
+Public repository. The package is `UNLICENSED`, so the owner keeps all rights until a license is added. The release workflow publishes it only to GitHub Packages. Only the owner can decide to publish to the public npm registry.

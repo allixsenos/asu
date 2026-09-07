@@ -10,4 +10,4 @@ ASU is a TypeScript CLI that reports agent subscription usage as the provider re
 - Run `npm run check` and `npm test` before you commit a behavior change.
 - Conventional Commits are mandatory. Prefer small, scoped commits.
 - Never create merge commits. Prefer squash merges. Rebase merges are permitted.
-- The repository is private. The release workflow publishes the package only to GitHub Packages. Do not publish to the public npm registry.
+- The repository is public and the package is `UNLICENSED`. The release workflow publishes the package only to GitHub Packages. Do not publish to the public npm registry.
