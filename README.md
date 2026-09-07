@@ -1,18 +1,18 @@
-# ASU — agent subscription usage
+# ASU: agent subscription usage
 
-See how much of your coding-agent subscription you have used, straight from the provider's account APIs.
+See how much of your coding-agent subscription you used, straight from the provider's account API.
 
-ASU is a local TypeScript CLI for humans and agents. It discovers supported installations and credentials, fetches providers concurrently, and returns a pretty table, plain text, or versioned JSON. Each provider has its own adapter; a failed provider does not hide the others' results.
+ASU is a local TypeScript CLI for humans and agents. It finds supported installations and credentials, fetches usage from each provider concurrently, and prints a table, plain text, or versioned JSON. Each provider has its own adapter. A failed provider does not hide the results of the other providers.
 
 ## Quick start
 
-Requires **Node.js 22.13 or newer**, npm, and Git. Sign in through your provider's own CLI first.
+ASU needs **Node.js 22.13 or newer**, npm, and Git. Sign in through the provider's own CLI first.
 
 ```bash
 npx --yes github:allixsenos/asu --table
 ```
 
-This repository is currently **private**. Your Git credentials must grant access to `allixsenos/asu`; ASU has not been published to the npm registry. GitHub access installs ASU, while your separate provider credentials let it retrieve usage.
+This repository is **private**. Your Git credentials must give access to `allixsenos/asu`. ASU is not on the npm registry. GitHub access installs ASU. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
@@ -28,19 +28,19 @@ npx --yes github:allixsenos/asu --provider claude,codex,copilot --fresh --table
 npx --yes github:allixsenos/asu --all --table
 ```
 
-Git installs build the TypeScript package through its `prepare` script. They need access to the dependency registry and permission to run that script. A GitHub URL requires no npm publication.
+A Git install builds the TypeScript package through its `prepare` script. The install needs access to the dependency registry and permission to run that script. A GitHub URL needs no npm publication.
 
-If you use SSH for private repositories, specify it explicitly:
+If you use SSH for private repositories, give the SSH URL explicitly:
 
 ```bash
 npx --yes --package='git+ssh://git@github.com/allixsenos/asu.git#main' asu --table
 ```
 
-For reproducible automation, replace `#main` with a reviewed commit SHA or tag. ASU's `--fresh` flag refreshes provider usage; it does not select a newer package revision.
+For reproducible automation, replace `#main` with a reviewed commit SHA or tag. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
 
 ## Real account output
 
-The following snapshot was fetched on **2026-09-07 at 12:18 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates, and will become stale as usage changes.
+We fetched the snapshot below on **2026-09-07 at 12:18 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
 
 The capture used the local checkout:
 
@@ -48,7 +48,7 @@ The capture used the local checkout:
 node dist/cli.js --provider claude,codex,copilot --fresh --no-cache --json
 ```
 
-The table and plain text below were generated from that same JSON snapshot using ASU's own renderers, so all three examples show identical data. No credentials or account identifiers are included. All reset times are UTC.
+ASU's own renderers made the table and the plain text below from that same JSON snapshot, so all three examples show identical data. The examples include no credentials and no account identifiers. All reset times are UTC.
 
 ### Pretty table
 
@@ -88,11 +88,11 @@ GitHub Copilot: installed: yes, authenticated: yes. Fetched 2026-09-07T12:18:06.
   Quota reset: 2026-10-01T00:00:00.000Z
 ```
 
-Copilot's premium row needs care: the endpoint returned zero entitlement, zero remaining requests, and zero percent remaining. ASU therefore displays `100% used` alongside `0 / 0 requests`. This does **not** establish that any premium requests were consumed. The internal endpoint may expose legacy quota information; treat its quantities as the provider's reported snapshot, not a complete billing statement.
+Read Copilot's premium row with care. The endpoint returned zero entitlement, zero remaining requests, and zero percent remaining. ASU therefore shows `100% used` next to `0 / 0 requests`. This does **not** show that anyone consumed a premium request. The internal endpoint can return legacy quota information. Treat its quantities as the provider's reported snapshot, not as a complete billing statement.
 
 ### Plain text
 
-Use `--plain` for readable output in logs and pipes. This is the default when stdout is not a terminal.
+Use `--plain` for readable output in logs and pipes. It is the default when stdout is not a terminal.
 
 <details>
 <summary>Show the complete plain-text output</summary>
@@ -133,7 +133,7 @@ GitHub Copilot (copilot)
 
 ### JSON
 
-Use `--json` for agents and scripts. Stdout contains the report; ASU invocation errors go to stderr. Human output rounds quantities to two decimal places, while JSON preserves normalized numeric precision.
+Use `--json` for agents and scripts. Stdout contains the report. An ASU invocation error goes to stderr. The human output rounds quantities to two decimal places. JSON keeps the normalized numeric precision.
 
 <details>
 <summary>Show the complete version 1 JSON report</summary>
@@ -302,34 +302,34 @@ Use `--json` for agents and scripts. Stdout contains the report; ASU invocation 
 asu [usage] [options]
 ```
 
-When running from GitHub, put ASU options after `github:allixsenos/asu`.
+When you run ASU from GitHub, put the ASU options after `github:allixsenos/asu`.
 
 | Option | Behavior |
 | --- | --- |
-| `--format plain\|table\|json` | Choose one output format |
-| `--plain`, `--table`, `--json` | Shortcuts for `--format`; mutually exclusive |
-| `--provider claude,codex` | Select provider IDs; repeat the flag or separate IDs with commas |
-| `--all` | Include providers without a detected installation or credentials |
-| `--fresh` | Bypass cached usage; concurrent fresh requests still share work |
-| `--no-cache` | Disable persistent cache reads and writes |
-| `--cache-dir PATH` | Override the usage cache directory |
-| `--plugin PATH_OR_PACKAGE` | Load an explicitly chosen, trusted provider plugin; repeatable |
+| `--format plain\|table\|json` | Select one output format |
+| `--plain`, `--table`, `--json` | Shortcuts for `--format`. Use only one. |
+| `--provider claude,codex` | Select provider IDs. Repeat the flag or separate the IDs with commas. |
+| `--all` | Include providers with no detected installation or credentials |
+| `--fresh` | Bypass cached usage. Concurrent fresh requests still share one fetch. |
+| `--no-cache` | Do not read or write the persistent cache |
+| `--cache-dir PATH` | Set the usage cache directory |
+| `--plugin PATH_OR_PACKAGE` | Load a trusted provider plugin that you name explicitly. Repeatable. |
 | `--help`, `-h` | Show help |
 | `--version`, `-v` | Print the package version |
 
-Without `--all` or `--provider`, ASU omits providers with no detected installation, credentials, or discovery error. Credentials may be usable even when the provider's executable is not on `PATH`. Installation and authentication are separate fields; `null` means unknown.
+Without `--all` or `--provider`, ASU omits a provider that has no detected installation, no credentials, and no discovery error. Credentials can work even when the provider's executable is not on `PATH`. Installation and authentication are separate fields. `null` means unknown.
 
 ### Exit codes
 
 | Code | Meaning |
 | --- | --- |
 | `0` | At least one selected provider returned available usage |
-| `1` | No selected provider returned available usage; a report is still printed |
-| `2` | Invalid invocation or plugin configuration; an error is printed to stderr |
+| `1` | No selected provider returned available usage. ASU still prints a report. |
+| `2` | Invalid invocation or plugin configuration. ASU prints an error to stderr. |
 
-A zero exit code does not mean every provider succeeded. Inspect each provider's `availability` when automating. One provider's missing credentials, timeout, or malformed response does not discard the other providers' data.
+A zero exit code does not mean that every provider succeeded. When you automate ASU, examine the `availability` of each provider. Missing credentials, a timeout, or a malformed response from one provider does not discard the data of the other providers.
 
-### Using JSON in scripts
+### Use JSON in scripts
 
 ```bash
 npx --yes github:allixsenos/asu --json > usage.json
@@ -342,47 +342,47 @@ jq '[.providers[]
   | .providerId]' usage.json
 ```
 
-Consumers should check `schemaVersion` before processing a report. Version 1 includes:
+A consumer must examine `schemaVersion` before it processes a report. Version 1 includes:
 
 | Field | Meaning |
 | --- | --- |
 | `generatedAt`, `warnings`, `providers` | Report timestamp, shared warnings, and independent provider results |
 | `providerId`, `displayName`, `experimental` | Provider identity and live-validation status |
 | `installed`, `credentialsPresent`, `authenticated` | Separate discovery and authentication observations |
-| `availability`, `reason` | `available`, `unavailable`, or `error`, with a reason code and safe message when needed |
+| `availability`, `reason` | `available`, `unavailable`, or `error`, with a reason code and a safe message when needed |
 | `planLabel` | Subscription label, or `null` if unknown |
-| `windows` | Variable-length usage windows with IDs, percentages, UTC resets, optional quantities, and model/surface scope |
+| `windows` | Variable-length usage windows with IDs, percentages, UTC resets, optional quantities, and model or surface scope |
 | `balances` | Reported credits or monetary balances with explicit units |
-| `details` | Additional normalized label/value information |
-| `fetchedAt`, `expiresAt`, `cached` | Timestamp and freshness of each provider's snapshot |
+| `details` | Additional normalized label and value pairs |
+| `fetchedAt`, `expiresAt`, `cached` | Timestamp and freshness of each provider snapshot |
 
-Unknown percentages and reset times are `null`. Missing quantities and balances do not mean zero. Unlimited allowances are explicit, and percentages may exceed 100 if a provider reports overage. Avoid assuming a fixed number or ordering of windows. See the [report contract](docs/architecture.md#report-contract) and [schemas](src/models.ts) for the full model.
+An unknown percentage or reset time is `null`. A missing quantity or balance does not mean zero. An unlimited allowance is explicit. A percentage can exceed 100 if a provider reports overage. Do not assume a fixed number or order of windows. See the [report contract](docs/architecture.md#report-contract) and the [schemas](src/models.ts) for the full model.
 
 ## Supported providers
 
 | ID | Provider | Credential sources, in precedence order | Validation |
 | --- | --- | --- | --- |
-| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`; macOS Keychain fallback | Live account tested on Linux |
-| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json` | Live account tested on Linux |
-| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, GitHub CLI `hosts.yml` | Live account tested on Linux |
-| `cursor` | Cursor | `CURSOR_ACCESS_TOKEN`, `CURSOR_TOKEN`, desktop SQLite, `~/.config/cursor/auth.json` | Experimental; fixture tests only |
-| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY` | Experimental; fixture tests only |
-| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json` | Experimental; fixture tests only |
-| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME` or `~/.kimi-code`, legacy `~/.kimi` | Experimental; fixture tests only |
-| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json` | Experimental; fixture tests only |
+| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`. macOS Keychain fallback. | Live account, Linux |
+| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json` | Live account, Linux |
+| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, GitHub CLI `hosts.yml` | Live account, Linux |
+| `cursor` | Cursor | `CURSOR_ACCESS_TOKEN`, `CURSOR_TOKEN`, desktop SQLite, `~/.config/cursor/auth.json` | Experimental. Fixture tests only. |
+| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY` | Experimental. Fixture tests only. |
+| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json` | Experimental. Fixture tests only. |
+| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME` or `~/.kimi-code`, legacy `~/.kimi` | Experimental. Fixture tests only. |
+| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json` | Experimental. Fixture tests only. |
 
-Only Claude Max 20x, Codex Plus, and GitHub Copilot Individual have been checked against the maintainer's live accounts. The other five adapters always return `experimental: true` and are marked in human output. Passing fixture tests does not verify a live subscription or every credential-store variant. macOS and Windows paths have not been live-tested.
+Only Claude Max 20x, Codex Plus, and GitHub Copilot Individual passed a check against the maintainer's live accounts. The other five adapters always return `experimental: true`, and the human output marks them. A passed fixture test does not prove a live subscription or every credential-store variant. The macOS and Windows paths have no live test.
 
 Credential lookup details:
 
-- Claude reads `claudeAiOauth.accessToken`. On macOS it falls back to Keychain service `Claude Code-credentials`, trying the current user's account before the legacy service-only lookup.
-- Codex requires OAuth `tokens.access_token`, with optional `tokens.account_id`. API-key authentication and OS-keyring-only credentials are not supported by this adapter.
-- Copilot honors `GH_CONFIG_DIR` and `XDG_CONFIG_HOME` when reading GitHub CLI credentials. Credentials held exclusively in Copilot CLI's own credential store are not currently read. An installed `gh` alone does not count as an installed Copilot CLI.
-- Cursor reads its desktop `state.vscdb` in read-only mode, using platform-specific locations including macOS Application Support and Windows `APPDATA`; Linux lookup honors `XDG_CONFIG_HOME`.
-- Kimi's credential filename is `credentials/kimi-code.json` beneath its configured or default home.
-- MiniMax supports `MINIMAX_REGION=cn` or a recognized `MINIMAX_BASE_URL`. Arbitrary API destinations are rejected.
+- Claude reads `claudeAiOauth.accessToken`. On macOS it falls back to the Keychain service `Claude Code-credentials`. It tries the current user's account before the legacy service-only lookup.
+- Codex needs the OAuth `tokens.access_token`, with an optional `tokens.account_id`. This adapter does not support API-key authentication or credentials that live only in the OS keyring.
+- Copilot obeys `GH_CONFIG_DIR` and `XDG_CONFIG_HOME` when it reads the GitHub CLI credentials. It does not read credentials that live only in the Copilot CLI's own store. An installed `gh` alone does not count as an installed Copilot CLI.
+- Cursor reads its desktop `state.vscdb` in read-only mode. It uses the platform locations, including macOS Application Support and Windows `APPDATA`. The Linux lookup obeys `XDG_CONFIG_HOME`.
+- Kimi's credential file is `credentials/kimi-code.json` under its configured or default home.
+- MiniMax supports `MINIMAX_REGION=cn` or a recognized `MINIMAX_BASE_URL`. ASU rejects an arbitrary API destination.
 
-The APIs include undocumented internal endpoints and can change. Adapter-specific request methods, schemas, primary sources, and limitations are recorded in [provider contracts](docs/provider-contracts.md).
+The APIs include undocumented internal endpoints and can change. The request methods, schemas, primary sources, and limitations of each adapter are in [provider contracts](docs/provider-contracts.md).
 
 ## How it works
 
@@ -398,53 +398,53 @@ CLI options → provider registry → concurrent provider operations
                             table / plain text / JSON
 ```
 
-Each provider lives in its own file under [`src/providers/`](src/providers). The shared service handles deadlines, failure isolation, caching, and report validation. Generic renderers support any number of windows or balances. All work happens in the local Node process: there is no dashboard, HTTP server, hosted backend, or telemetry.
+Each provider lives in its own file under [`src/providers/`](src/providers). The shared service handles deadlines, failure isolation, caching, and report validation. The renderers accept any number of windows or balances. All work happens in the local Node process. There is no dashboard, HTTP server, hosted backend, or telemetry.
 
 ### Cache and timeouts
 
-Results are cached for **five minutes**, separately by provider and credential identity. The cache directory is chosen in this order:
+ASU caches a result for **five minutes**, separately for each provider and credential identity. It selects the cache directory in this order:
 
 1. `--cache-dir PATH`
 2. `$ASU_CACHE_DIR`
 3. `$XDG_CACHE_HOME/asu`
 4. `~/.cache/asu`
 
-Credentials are read on each invocation; changes invalidate the cache key. Concurrent calls share work in-process and use filesystem locks across CLI invocations. API failures are cached too. Missing, malformed, and locally expired credentials are checked again on each invocation without an API request.
+ASU reads the credentials on each invocation. A changed credential changes the cache key. Concurrent calls in one process share one fetch. Concurrent CLI invocations use file locks. ASU also caches an API failure. It examines missing, malformed, and locally expired credentials again on each invocation, without an API request.
 
-Use `--fresh` to bypass an existing result after resolving a problem. Use `--no-cache` to avoid reading or writing the persistent cache. The report still includes the snapshot's five-minute `expiresAt` even when disk caching is disabled. Expired entries are replaced on the next lookup; unused old account entries are not automatically pruned.
+Use `--fresh` to bypass an existing result after you solve a problem. Use `--no-cache` when ASU must not read or write the persistent cache. The report still includes the five-minute `expiresAt` of the snapshot when disk caching is off. ASU replaces an expired entry at the next lookup. It does not remove the old entries of unused accounts.
 
-HTTP requests have an eight-second deadline, a one-MiB response limit, and no redirects. Each provider operation has a twelve-second deadline. Cache-lock contention is bounded at approximately 32 seconds; cache failures fall back to fetching without persistence and produce a warning.
+An HTTP request has an eight-second deadline, a one-MiB response limit, and no redirects. Each provider operation has a twelve-second deadline. A wait for the cache lock stops after about 32 seconds. When the cache fails, ASU fetches without persistence and adds a warning.
 
 ### Credential handling
 
-ASU reads existing credentials and sends them only to the adapter's provider endpoint. It never refreshes tokens, signs in, rewrites provider files, executes the provider CLI to obtain usage, or estimates subscription consumption from conversation history. Missing or rejected credentials produce an unavailable result; sign in or refresh through the provider's own CLI.
+ASU reads existing credentials and sends them only to the provider endpoint of the adapter. It never refreshes a token, signs in, rewrites a provider file, runs the provider CLI to get usage, or estimates subscription consumption from conversation history. Missing or rejected credentials give an unavailable result. Sign in or refresh through the provider's own CLI.
 
-Only normalized usage is printed and cached. Tokens, refresh tokens, account IDs, and raw API errors are excluded. The cache uses private directory/file permissions on Unix and SHA-256 filenames derived from credential identity. Usage reports still contain plan and account-usage information; the examples above were deliberately shared by the maintainer.
+ASU prints and caches only normalized usage. It excludes tokens, refresh tokens, account IDs, and raw API errors. The cache uses private directory and file permissions on Unix, and SHA-256 filenames derived from the credential identity. A usage report still contains plan and account-usage information. The maintainer shared the examples above on purpose.
 
 ## Troubleshooting
 
-| Symptom | What to check |
+| Symptom | What to examine |
 | --- | --- |
-| GitHub says the repository is missing or access is denied | It is private. Verify Git access with `git ls-remote git@github.com:allixsenos/asu.git HEAD`, or use your configured HTTPS authentication. |
-| Git installation fails during `prepare` | Confirm the Node version, dependency-registry access, and that npm permits build scripts. See the local checkout instructions below. |
-| npm 9 reports `could not determine executable to run` while preparing a Git install | Try `npm exec --yes --package=github:allixsenos/asu -- asu --table` instead of its `npx` wrapper. |
-| No supported agents or credentials detected | Try `--all`, check the credential sources above, and verify the expected home-directory overrides and `PATH`. |
-| `missing_credentials`, `invalid_credentials`, or `unauthorized` | Sign in or refresh through the provider's CLI, then retry ASU with `--fresh`. A successful CLI login helps only if its credential store is supported above. |
-| `credential_read_error` | Check that the credential file or store is readable by your current user. |
-| `timeout`, `rate_limited`, or `http_error` | Check connectivity and the provider's status; wait before retrying a rate limit. Use `--fresh` to bypass a cached failure. |
-| `invalid_response` | The provider may have changed its response schema. Check [known contract limitations](docs/provider-contracts.md). |
-| Usage appears stale | Check `fetchedAt` and `cached`; use `--fresh`. ASU cannot make the upstream provider update its figures sooner. |
-| One provider fails but the command exits successfully | Exit code `0` means at least one provider succeeded. Inspect each provider's `availability`. |
+| GitHub says the repository is missing or access is denied | The repository is private. Examine your Git access with `git ls-remote git@github.com:allixsenos/asu.git HEAD`, or use your configured HTTPS authentication. |
+| The Git install fails during `prepare` | Examine the Node version, the dependency-registry access, and whether npm permits build scripts. See the local checkout instructions below. |
+| npm 9 reports `could not determine executable to run` while it prepares a Git install | Use `npm exec --yes --package=github:allixsenos/asu -- asu --table` instead of the `npx` wrapper. |
+| No supported agents or credentials detected | Use `--all`, examine the credential sources above, and examine the home-directory overrides and `PATH`. |
+| `missing_credentials`, `invalid_credentials`, or `unauthorized` | Sign in or refresh through the provider's CLI, then run ASU again with `--fresh`. A successful CLI login helps only if ASU supports its credential store. |
+| `credential_read_error` | Make sure that your current user can read the credential file or store. |
+| `timeout`, `rate_limited`, or `http_error` | Examine the connectivity and the provider status. Wait before you retry after a rate limit. Use `--fresh` to bypass a cached failure. |
+| `invalid_response` | The provider may have a new response schema. See the [known limitations](docs/provider-contracts.md#known-limitations). |
+| Usage looks stale | Examine `fetchedAt` and `cached`, then use `--fresh`. ASU cannot make the provider update its figures sooner. |
+| One provider fails but the command exits with zero | Exit code `0` means that at least one provider succeeded. Examine the `availability` of each provider. |
 
 ## Plugins
 
-Providers are pluggable ESM modules with a unique ID, version, and three operations: detect installation, resolve credentials, and fetch normalized usage. An adapter owns its credential format and API contract; the shared service and renderers stay provider-independent.
+A provider is an ESM module with a unique ID, a version, and three operations: detect the installation, resolve the credentials, and fetch normalized usage. An adapter owns its credential format and its API contract. The shared service and the renderers stay provider-independent.
 
 ```bash
 npx --yes github:allixsenos/asu --plugin ./my-provider.mjs --provider my-provider --json
 ```
 
-A plugin can export `default` or `provider`. Installed package names resolve from the current working directory. Plugins are explicitly loaded local code with access to the process; only load modules you trust. ASU does not download or automatically discover plugins. See the [plugin contract and example](docs/architecture.md#external-plugin-example) for implementation details. The package also exports its service, schemas, and TypeScript types as a library.
+A plugin can export `default` or `provider`. ASU resolves an installed package name from the current working directory. A plugin is local code that you load explicitly, and it has full access to the process. Load only modules that you trust. ASU does not download plugins and does not search for them. See the [plugin contract and example](docs/architecture.md#external-plugin-example) for the details. The package also exports its service, schemas, and TypeScript types as a library.
 
 ## Local development and testing
 
@@ -453,7 +453,7 @@ gh repo clone allixsenos/asu
 cd asu
 npm ci
 
-# npm ci builds through prepare; rebuild after editing TypeScript
+# npm ci builds through prepare. Rebuild after you edit TypeScript.
 npm run build
 node dist/cli.js --table
 node dist/cli.js --provider claude,codex,copilot --fresh --json
@@ -463,25 +463,28 @@ npm run check
 npm test
 ```
 
-Tests use synthetic API responses and temporary credential stores. They cover normalization, credential precedence and expiration, malformed responses, failure isolation, timeouts, cache expiry, concurrent requests, account changes, redaction, and actual CLI subprocess output. They do not use your accounts or call provider APIs. Live verification is a separate step, as documented in the snapshot above.
+The tests use synthetic API responses and temporary credential stores. They cover normalization, credential precedence and expiration, malformed responses, failure isolation, timeouts, cache expiry, concurrent requests, account changes, redaction, and real CLI subprocess output. They do not use your accounts and do not call provider APIs. Live verification is a separate step, as the snapshot above documents.
 
-GitHub Actions runs type checks, tests, and npm-package smoke checks on Node 22 and 24. To try the packed artifact locally without publishing:
+GitHub Actions runs the type checks, the tests, and a packed-package smoke test on Node 22 and 24. To try the packed artifact locally without a publication:
 
 ```bash
-npm pack
-npx --yes --package ./allixsenos-asu-0.1.0.tgz asu --help
-npx --yes --package ./allixsenos-asu-0.1.0.tgz asu --table
+npx --yes --package "./$(npm pack --silent)" asu --help
+npx --yes --package "./$(npm pack --silent)" asu --table
 ```
 
-Enable the repository's commit-message hook and prefer rebasing pulls:
+Enable the commit-message hook of the repository and prefer rebase on pull:
 
 ```bash
 git config core.hooksPath .githooks
 git config pull.rebase true
 ```
 
-Conventional Commits are mandatory. Prefer small, scoped commits and squash merges; rebase merges are allowed, and merge commits are disabled. [`CLAUDE.md`](CLAUDE.md) is a symlink to [`AGENTS.md`](AGENTS.md), so Claude and other agents share the project instructions.
+Conventional Commits are mandatory. Prefer small, scoped commits and squash merges. Rebase merges are permitted, and merge commits are off. [`CLAUDE.md`](CLAUDE.md) is a symlink to [`AGENTS.md`](AGENTS.md), so Claude and other agents share the project instructions.
+
+## Releases
+
+[`CHANGELOG.md`](CHANGELOG.md) lists the changes in each version. [Releasing](docs/releasing.md) describes how to tag a version and publish the GitHub release with the packed tarball.
 
 ## Project status
 
-Private development repository. The package is marked `private: true`, is not published to npm, and is currently `UNLICENSED`. Making the repository public or publishing a package requires the owner's explicit decision.
+Private development repository. The package is `private: true`, is not on npm, and is `UNLICENSED`. Only the owner can decide to make the repository public or to publish a package.

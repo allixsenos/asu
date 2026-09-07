@@ -14,7 +14,7 @@ Provider usage API → adapter normalization → schema validation + redaction
 Versioned report → plain text / table / JSON
 ```
 
-The package exports a library API as well as the `asu` executable. It contains no frontend or daemon. Provider IDs and versions define adapter identity; credentials contribute to the cache key so accounts cannot share results accidentally.
+The package exports a library API and the `asu` executable. It contains no frontend and no daemon. The provider ID and version identify an adapter. The credentials are part of the cache key, so two accounts never share a cached result by accident.
 
 ## Provider contract
 
@@ -30,15 +30,15 @@ interface Provider {
 }
 ```
 
-An adapter owns its credential formats, HTTP request, and response normalization. `LocalContext` supplies the home directory, environment, platform, bounded file readers, Keychain lookup, and read-only SQLite lookup. `ProviderContext` adds the JSON HTTP transport, abort signal, and clock. None of the credentials object is returned to consumers. A new provider does not require new branches in the usage service or output code.
+An adapter owns its credential formats, its HTTP request, and its response normalization. `LocalContext` supplies the home directory, the environment, the platform, bounded file readers, a Keychain lookup, and a read-only SQLite lookup. `ProviderContext` adds the JSON HTTP transport, an abort signal, and a clock. Consumers never receive the credentials object. A new provider needs no new branch in the usage service or in the output code.
 
-`detect` checks executable/app presence without launching the provider. A provider accessed through other clients, such as Z.ai, can return `null`. `resolveCredentials` reads credentials on each invocation; it must not refresh them. `fetchUsage` must forward `context.signal` to `context.request`.
+`detect` examines whether the executable or app is present. It does not start the provider. A provider that users reach through other clients, such as Z.ai, can return `null`. `resolveCredentials` reads the credentials on each invocation. It must not refresh them. `fetchUsage` must pass `context.signal` to `context.request`.
 
-Provider functions run concurrently, with independent results and failures. The service validates normalized outputs, strips undeclared properties, sanitizes terminal controls, and redacts token/account-ID echoes before caching. Plugin exceptions never appear verbatim in output. Plugins are trusted local code, not sandboxed: do not load untrusted modules. A synchronous plugin that blocks the Node event loop cannot be interrupted by an asynchronous deadline.
+The service runs the provider functions concurrently. Each result and each failure is independent. The service validates the normalized output, removes undeclared properties, removes terminal control characters, and redacts echoed tokens and account IDs before it caches the result. A plugin exception never appears in the output as written. Plugins are trusted local code and run without a sandbox. Do not load a module you do not trust. The asynchronous deadline cannot stop a synchronous plugin that blocks the Node event loop.
 
 ## External plugin example
 
-Save an ESM module, for example `my-provider.mjs`, exporting `default` or `provider`:
+Save an ESM module, for example `my-provider.mjs`, that exports `default` or `provider`:
 
 ```js
 export default {
@@ -68,16 +68,16 @@ export default {
 node dist/cli.js --plugin ./my-provider.mjs --provider my-provider --json
 ```
 
-Installed package names are resolved from the current working directory. Plugins are never downloaded or auto-discovered. Duplicate provider IDs and malformed interfaces are rejected. TypeScript plugins can import `Provider`, `Credentials`, `UsageData`, and other exported types from `@allixsenos/asu`; distribute compiled JavaScript for Node compatibility. Bump `version` after changing an adapter's request or normalization semantics.
+ASU resolves an installed package name from the current working directory. It never downloads a plugin and never searches for one. It rejects a duplicate provider ID and a malformed interface. A TypeScript plugin can import `Provider`, `Credentials`, `UsageData`, and the other exported types from `@allixsenos/asu`. Distribute compiled JavaScript so that Node can load it. Bump `version` after you change the request or the normalization semantics of an adapter.
 
 ## Report contract
 
-`schemaVersion: 1` is the machine interface. `generatedAt` describes the report; `fetchedAt` and `expiresAt` describe each provider snapshot. Results include `providerId`, `displayName`, `experimental`, `installed`, `credentialsPresent`, `authenticated`, `availability`, optional `reason`, `planLabel`, `windows`, `balances`, `details`, and `cached`.
+`schemaVersion: 1` is the machine interface. `generatedAt` describes the report. `fetchedAt` and `expiresAt` describe each provider snapshot. A result includes `providerId`, `displayName`, `experimental`, `installed`, `credentialsPresent`, `authenticated`, `availability`, an optional `reason`, `planLabel`, `windows`, `balances`, `details`, and `cached`.
 
-Windows have stable IDs, labels, `percentUsed`, UTC `resetsAt`, and optionally quantities, units, unlimited status, and model/surface scope. Unknown percentages and resets are `null`; absent balances and quantities are not zero. Percentages may exceed 100 when a provider reports overage. Human renderers round to two decimals; JSON preserves normalized precision. Unlimited windows do not render a percentage.
+A window has a stable ID, a label, `percentUsed`, and a UTC `resetsAt`. It can also have quantities, a unit, an unlimited flag, and a model or surface scope. An unknown percentage or reset is `null`. An absent balance or quantity is not zero. A percentage can exceed 100 when the provider reports overage. The human renderers round to two decimals. JSON keeps the normalized precision. An unlimited window shows no percentage.
 
-Availability is `available`, `unavailable` (missing/rejected/unreadable credentials), or `error` (fetch/normalization failure). Authenticated is `true` only after a recognized successful usage response, `false` for unavailable credentials, and `null` after a request failure that cannot establish authentication. These are snapshot values, not a promise that the token remains valid after `fetchedAt`.
+Availability is one of three values. `available` means the provider returned usage. `unavailable` means the credentials are missing, rejected, or unreadable. `error` means the fetch or the normalization failed. `authenticated` is `true` only after a recognized successful usage response. It is `false` for unavailable credentials. It is `null` after a request failure that cannot establish authentication. These are snapshot values. They do not promise that the token stays valid after `fetchedAt`.
 
 ## Tests
 
-Normalization tests cover observed and synthetic schemas. Credential tests inject environment/files and check precedence, expiration, and read-only behavior. Service tests use fake clocks and concurrent callers to test isolation, coalescing, TTL expiry, account changes, persistent locks, corruption, and redaction. CLI tests execute actual subprocesses and parse stdout, including symlinked entry points used by npm. Live checks remain a separate, explicitly documented validation step.
+Normalization tests cover observed and synthetic schemas. Credential tests inject environment variables and files, then examine precedence, expiration, and read-only behavior. Service tests use fake clocks and concurrent callers to examine isolation, coalescing, TTL expiry, account changes, persistent locks, corruption, and redaction. CLI tests run real subprocesses and parse stdout, including the symlinked entry points that npm creates. Live checks are a separate, documented validation step.

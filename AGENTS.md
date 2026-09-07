@@ -1,13 +1,13 @@
 # ASU
 
-ASU is a TypeScript CLI for provider-reported agent subscription usage. Its consumers are humans and agents; support plain text, a pretty table, and versioned JSON. Do not add a dashboard or HTTP server.
+ASU is a TypeScript CLI that reports agent subscription usage as the provider reports it. Humans and agents use it. Support plain text, a table, and versioned JSON. Do not add a dashboard or an HTTP server.
 
-- Providers are pluggable and live in separate files under `src/providers/`.
-- Keep provider-specific credential formats and API normalization in their adapters.
+- Providers are plugins. Each one lives in its own file under `src/providers/`.
+- Keep provider-specific credential formats and API normalization inside the adapter.
 - Credentials are read-only. Never refresh tokens, rewrite provider files, or log credentials or raw API errors.
-- Read account usage from provider APIs, never estimate it from conversation history.
-- Verify changing provider contracts against primary sources and document uncertainty.
-- Run `npm run check` and `npm test` before committing behavior changes.
+- Read account usage from provider APIs. Never estimate it from conversation history.
+- Provider contracts change. Check them against primary sources and document what is uncertain.
+- Run `npm run check` and `npm test` before you commit a behavior change.
 - Conventional Commits are mandatory. Prefer small, scoped commits.
-- Never create merge commits. Prefer squash merges; rebase merges are allowed.
+- Never create merge commits. Prefer squash merges. Rebase merges are permitted.
 - The repository is private. Do not publish it or the npm package without explicit authorization.
