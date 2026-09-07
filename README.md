@@ -12,7 +12,7 @@ ASU needs **Node.js 22.13 or newer**, npm, and Git. Sign in through the provider
 npx --yes github:allixsenos/asu --table
 ```
 
-This repository is **private**. Your Git credentials must give access to `allixsenos/asu`. ASU is not on the npm registry. GitHub access installs ASU. Your provider credentials, which are separate, let ASU read usage.
+This repository is **private**. Your Git credentials must give access to `allixsenos/asu`. Released versions are on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. GitHub access installs ASU. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
@@ -483,8 +483,8 @@ Conventional Commits are mandatory. Prefer small, scoped commits and squash merg
 
 ## Releases
 
-[`CHANGELOG.md`](CHANGELOG.md) lists the changes in each version. [Releasing](docs/releasing.md) describes how to tag a version and publish the GitHub release with the packed tarball.
+release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release from the commit history. [Releasing](docs/releasing.md) describes the release pull request, the GitHub release with the packed tarball, and the GitHub Packages publication.
 
 ## Project status
 
-Private development repository. The package is `private: true`, is not on npm, and is `UNLICENSED`. Only the owner can decide to make the repository public or to publish a package.
+Private development repository. The package is `UNLICENSED`. The release workflow publishes it only to GitHub Packages, where repository access controls who can install it. Only the owner can decide to make the repository public or to publish to the public npm registry.

@@ -1,7 +1,6 @@
 {
   "name": "@allixsenos/asu",
   "version": "0.1.0",
-  "private": true,
   "description": "Agent subscription usage for humans and agents",
   "type": "module",
   "bin": {
@@ -26,6 +25,9 @@
     "url": "git+https://github.com/allixsenos/asu.git"
   },
   "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
