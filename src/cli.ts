@@ -9,6 +9,7 @@ import { loadProviders } from './registry.js';
 import { UsageService } from './service.js';
 import { render } from './output.js';
 import type { OutputFormat } from './output.js';
+import { version } from './version.js';
 
 export const help = `asu — agent subscription usage
 
@@ -43,7 +44,7 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
       help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' },
     } });
     if (values.help) { process.stdout.write(help); return 0; }
-    if (values.version) { process.stdout.write('0.1.0\n'); return 0; }
+    if (values.version) { process.stdout.write(`${version}\n`); return 0; }
     if (positionals.length > 1 || positionals.length === 1 && positionals[0] !== 'usage') throw new Error('Expected asu [usage]. See --help.');
     const formats = [values.format, values.json ? 'json' : undefined, values.plain ? 'plain' : undefined, values.table ? 'table' : undefined].filter(Boolean);
     if (formats.length > 1 || formats.some(value => !['plain', 'table', 'json'].includes(value!))) throw new Error('Choose one output format: plain, table, or json.');

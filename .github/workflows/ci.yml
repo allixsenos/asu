@@ -25,5 +25,4 @@ jobs:
       - run: node scripts/check-commit.mjs
         env:
           ASU_PR_TITLE: ${{ github.event.pull_request.title }}
-      - run: npm pack
-      - run: npx --yes --package ./allixsenos-asu-0.1.0.tgz asu --help
+      - run: npx --yes --package "./$(npm pack --silent)" asu --help
