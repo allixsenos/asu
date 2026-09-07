@@ -1,6 +1,7 @@
 {
   "name": "@allixsenos/asu",
   "version": "0.1.0",
+  "private": true,
   "description": "Agent subscription usage for humans and agents",
   "type": "module",
   "bin": {
@@ -29,7 +30,7 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test test/*.test.mjs",
-    "prepack": "npm run build",
+    "prepare": "npm run build",
     "start": "node dist/cli.js"
   },
   "dependencies": {
