@@ -1,0 +1,2 @@
+#!/bin/sh
+exec node "$(dirname "$0")/../scripts/check-commit.mjs" "$1"
