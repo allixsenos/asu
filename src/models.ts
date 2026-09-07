@@ -38,6 +38,7 @@ export const reasonCodes = ['missing_credentials', 'invalid_credentials', 'crede
 export const providerUsageSchema = usageDataSchema.extend({
   providerId: id,
   displayName: displayText,
+  experimental: z.boolean(),
   installed: z.boolean().nullable(),
   credentialsPresent: z.boolean(),
   authenticated: z.boolean().nullable(),
@@ -50,6 +51,7 @@ export const providerUsageSchema = usageDataSchema.extend({
 export const reportSchema = z.object({
   schemaVersion: z.literal(1),
   generatedAt: timestamp,
+  warnings: z.array(displayText),
   providers: z.array(providerUsageSchema),
 });
 export type UsageWindow = z.infer<typeof windowSchema>;

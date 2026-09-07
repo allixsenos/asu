@@ -19,6 +19,7 @@ export interface Provider {
   displayName: string;
   /** Bump when request/normalization semantics change, to invalidate cached data. */
   version: number;
+  experimental?: boolean;
   detect(context: LocalContext): Promise<boolean | null>;
   resolveCredentials(context: LocalContext): Promise<Credentials | null>;
   fetchUsage(context: ProviderContext, credentials: Credentials): Promise<UsageData>;
