@@ -6,37 +6,37 @@ ASU is a local TypeScript CLI for humans and agents. It finds supported installa
 
 ## Quick start
 
-ASU needs **Node.js 22.13 or newer**, npm, and Git. Sign in through the provider's own CLI first.
+ASU needs **Node.js 22.13 or newer** and npm. Sign in through the provider's own CLI first.
 
 ```bash
-npx --yes github:allixsenos/asu --table
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --table
 ```
 
-Released versions are on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. The GitHub URL above installs ASU without a token. Your provider credentials, which are separate, let ASU read usage.
+The URL above always points to the tarball of the newest [GitHub release](https://github.com/allixsenos/asu/releases). The tarball contains the built package, so no build step runs and no token is needed. Released versions are also on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
-npx --yes github:allixsenos/asu --plain
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --plain
 
 # Structured output for agents and scripts
-npx --yes github:allixsenos/asu --json
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --json
 
 # Select accounts and bypass the five-minute usage cache
-npx --yes github:allixsenos/asu --provider claude,codex,copilot --fresh --table
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --provider claude,codex,copilot --fresh --table
 
 # Include every built-in provider, even if no credentials are found
-npx --yes github:allixsenos/asu --all --table
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --all --table
 ```
 
-A Git install builds the TypeScript package through its `prepare` script. The install needs access to the dependency registry and permission to run that script. A GitHub URL needs no npm publication.
+To pin a version, use the versioned asset instead, for example `https://github.com/allixsenos/asu/releases/download/v0.1.0/allixsenos-asu-0.1.0.tgz`. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
 
-If you prefer SSH, give the SSH URL explicitly:
+You can also run the source from GitHub. This builds the TypeScript package through its `prepare` script, so the install needs Git, access to the dependency registry, and permission to run that script.
 
 ```bash
-npx --yes --package='git+ssh://git@github.com/allixsenos/asu.git#main' asu --table
+npm exec --yes --package=github:allixsenos/asu -- asu --table
 ```
 
-For reproducible automation, replace `#main` with a reviewed commit SHA or tag. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
+For SSH, replace `github:allixsenos/asu` with `git+ssh://git@github.com/allixsenos/asu.git#main`. For reproducible automation, replace `#main` with a reviewed commit SHA or tag. On npm 9, the shorter `npx --yes github:allixsenos/asu` form exits with code 1 during the Git install, sometimes with no message. Use the release tarball or the `npm exec` form above.
 
 ## Real account output
 
@@ -302,7 +302,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
 asu [usage] [options]
 ```
 
-When you run ASU from GitHub, put the ASU options after `github:allixsenos/asu`.
+When you run ASU through `npx`, put the ASU options after the package URL.
 
 | Option | Behavior |
 | --- | --- |
@@ -332,7 +332,7 @@ A zero exit code does not mean that every provider succeeded. When you automate 
 ### Use JSON in scripts
 
 ```bash
-npx --yes github:allixsenos/asu --json > usage.json
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --json > usage.json
 jq '.providers[] | {providerId, availability, planLabel, windows}' usage.json
 
 # Find available providers with a window at or above 80% used
@@ -427,7 +427,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 | --- | --- |
 | GitHub says the repository is missing or access is denied | Examine your Git access with `git ls-remote https://github.com/allixsenos/asu.git HEAD`. The SSH URL needs a GitHub SSH key. |
 | The Git install fails during `prepare` | Examine the Node version, the dependency-registry access, and whether npm permits build scripts. See the local checkout instructions below. |
-| npm 9 reports `could not determine executable to run` while it prepares a Git install | Use `npm exec --yes --package=github:allixsenos/asu -- asu --table` instead of the `npx` wrapper. |
+| `npx --yes github:allixsenos/asu` exits with code 1 and prints nothing, or npm 9 reports `could not determine executable to run` | npm 9 fails on Git installs through `npx`. Use the release tarball URL from the quick start, or `npm exec --yes --package=github:allixsenos/asu -- asu --table`. |
 | No supported agents or credentials detected | Use `--all`, examine the credential sources above, and examine the home-directory overrides and `PATH`. |
 | `missing_credentials`, `invalid_credentials`, or `unauthorized` | Sign in or refresh through the provider's CLI, then run ASU again with `--fresh`. A successful CLI login helps only if ASU supports its credential store. |
 | `credential_read_error` | Make sure that your current user can read the credential file or store. |
@@ -441,7 +441,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 A provider is an ESM module with a unique ID, a version, and three operations: detect the installation, resolve the credentials, and fetch normalized usage. An adapter owns its credential format and its API contract. The shared service and the renderers stay provider-independent.
 
 ```bash
-npx --yes github:allixsenos/asu --plugin ./my-provider.mjs --provider my-provider --json
+npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --plugin ./my-provider.mjs --provider my-provider --json
 ```
 
 A plugin can export `default` or `provider`. ASU resolves an installed package name from the current working directory. A plugin is local code that you load explicitly, and it has full access to the process. Load only modules that you trust. ASU does not download plugins and does not search for them. See the [plugin contract and example](docs/architecture.md#external-plugin-example) for the details. The package also exports its service, schemas, and TypeScript types as a library.

@@ -40,4 +40,4 @@ Then run:
 npx @allixsenos/asu --table
 ```
 
-The tarball on the GitHub release also installs with `npm install <tarball>`.
+Each GitHub release also carries the tarball twice: as `allixsenos-asu-<version>.tgz` and as `asu.tgz`. The second name gives `https://github.com/allixsenos/asu/releases/latest/download/asu.tgz` a stable URL for the newest release. Both work with `npx --yes <url>` and with `npm install <url>`, and neither needs a token or a build step.

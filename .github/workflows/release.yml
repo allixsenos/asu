@@ -43,7 +43,10 @@ jobs:
       - run: echo "TARBALL=$(npm pack --silent)" >> "$GITHUB_ENV"
       - run: npx --yes --package "./$TARBALL" asu --help
       - name: Attach the tarball to the GitHub release
-        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" "$TARBALL"
+        # asu.tgz gives releases/latest/download a stable filename.
+        run: |
+          cp "$TARBALL" asu.tgz
+          gh release upload "${{ needs.release-please.outputs.tag_name }}" "$TARBALL" asu.tgz
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Publish to GitHub Packages
