@@ -3,11 +3,27 @@
   "version": "0.1.0",
   "description": "Agent subscription usage for humans and agents",
   "type": "module",
-  "bin": { "asu": "dist/cli.js" },
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist", "README.md", "docs"],
-  "engines": { "node": ">=22.13.0" },
-  "repository": { "type": "git", "url": "git+https://github.com/allixsenos/asu.git" },
+  "bin": {
+    "asu": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allixsenos/asu.git"
+  },
   "license": "UNLICENSED",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -16,6 +32,14 @@
     "prepack": "npm run build",
     "start": "node dist/cli.js"
   },
-  "dependencies": { "yaml": "^2.9.0", "zod": "^4.3.6" },
-  "devDependencies": { "@types/node": "^24.13.3", "typescript": "~5.9.3" }
+  "dependencies": {
+    "proper-lockfile": "^4.1.2",
+    "yaml": "^2.9.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/proper-lockfile": "^4.1.4",
+    "typescript": "~5.9.3"
+  }
 }
