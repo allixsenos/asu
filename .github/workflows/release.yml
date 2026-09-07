@@ -1,0 +1,31 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - name: Make sure the tag matches package.json
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $expected"
+            exit 1
+          fi
+      - run: echo "TARBALL=$(npm pack --silent)" >> "$GITHUB_ENV"
+      - run: npx --yes --package "./$TARBALL" asu --help
+      - name: Create the GitHub release with the packed tarball
+        run: gh release create "$GITHUB_REF_NAME" "$TARBALL" --title "$GITHUB_REF_NAME" --notes-from-tag --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
