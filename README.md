@@ -494,4 +494,4 @@ release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release fr
 
 ## Project status
 
-Public repository. The package is `UNLICENSED`, so the owner keeps all rights until a license is added. The release workflow publishes it to the public npm registry.
+Public repository under the [MIT license](LICENSE). The release workflow publishes the package to the public npm registry.

@@ -24,7 +24,7 @@
     "type": "git",
     "url": "git+https://github.com/allixsenos/asu.git"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
