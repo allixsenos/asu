@@ -22,20 +22,39 @@ const report = { schemaVersion: 1, generatedAt: '2026-09-07T12:00:00.000Z', warn
 }] };
 
 test('plain, table and JSON present zero, unknown and unlimited without inventing quantities', () => {
-  const plain = renderPlain(report);
+  const plain = renderPlain(report, { utc: true });
   assert.ok(plain.includes('25% used; resets 2026-09-07T16:00:00.000Z'));
   assert.ok(plain.includes('Weekly: 0% used; resets unknown'));
   assert.ok(plain.includes('Chat: Unlimited'));
   assert.ok(plain.includes('4.5 credits left'));
   assert.ok(!plain.includes('\x1b'));
-  const table = renderTable(report);
+  const table = renderTable(report, { utc: true });
   assert.ok(table.includes('┌'));
+  assert.ok(table.includes('Resets (UTC)'));
+  assert.ok(table.includes('2026-09-07 16:00'));
   assert.ok(table.includes('25% used'));
   assert.ok(table.includes('Unlimited'));
   assert.deepEqual(reportSchema.parse(JSON.parse(render(report, 'json'))), report);
 });
+test('plain and table show times relative to now unless --utc is passed', () => {
+  const now = Date.parse('2026-09-07T13:30:00.000Z');
+  const plain = renderPlain(report, { now });
+  assert.ok(plain.includes('5 hours: 25% used; resets in 2h30m'));
+  assert.ok(plain.includes('Weekly: 0% used; resets unknown'));
+  assert.ok(plain.includes('Fetched 1h30m ago; fresh; expires now'));
+  const table = renderTable(report, { now });
+  assert.ok(table.includes('Resets in'));
+  assert.ok(table.includes('│ 2h30m'));
+  assert.ok(table.includes('│ Unknown'));
+  assert.ok(table.includes('Fetched 1h30m ago; cache expires now.'));
+  const soon = renderPlain(report, { now: Date.parse('2026-09-07T12:00:20.000Z') });
+  assert.ok(soon.includes('Fetched <1m ago; fresh; expires in 5m'));
+  const late = renderPlain(report, { now: Date.parse('2026-09-04T10:00:00.000Z') });
+  assert.ok(late.includes('resets in 3d6h'));
+  assert.ok(!JSON.parse(render(report, 'json', { now })).providers[0].windows[0].resetsAt.includes('in '));
+});
 test('table wraps rather than dropping values in narrow terminals', () => {
-  const table = renderTable(report, 60);
+  const table = renderTable(report, { columns: 60 });
   const grid = table.split('\n').filter(line => /^[┌│├└]/.test(line));
   assert.ok(grid.every(line => [...line].length <= 60));
   assert.ok(table.includes('Weekly'));

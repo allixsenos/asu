@@ -17,6 +17,7 @@ Usage: asu [usage] [options]
   --json                     Shortcut for --format json
   --plain                    Shortcut for --format plain
   --table                    Shortcut for --format table
+  --utc                      Print full UTC timestamps instead of times relative to now
   --provider <id>             Select provider; repeat or use comma-separated IDs
   --all                      Include providers with no detected install or credentials
   --fresh                    Fetch again, bypassing the five-minute cache
@@ -35,7 +36,7 @@ export async function run(args = process.argv.slice(2)) {
     let format = process.stdout.isTTY ? 'table' : 'plain';
     try {
         const { values, positionals } = parseArgs({ args, allowPositionals: true, strict: true, options: {
-                format: { type: 'string' }, json: { type: 'boolean' }, plain: { type: 'boolean' }, table: { type: 'boolean' },
+                format: { type: 'string' }, json: { type: 'boolean' }, plain: { type: 'boolean' }, table: { type: 'boolean' }, utc: { type: 'boolean' },
                 provider: { type: 'string', multiple: true }, all: { type: 'boolean' }, fresh: { type: 'boolean' },
                 'no-cache': { type: 'boolean' }, 'cache-dir': { type: 'string' }, plugin: { type: 'string', multiple: true },
                 help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' },
@@ -65,7 +66,7 @@ export async function run(args = process.argv.slice(2)) {
         const report = await service.collect({ providerIds, fresh: values.fresh });
         if (!values.all && !providerIds?.length)
             report.providers = report.providers.filter(provider => provider.installed || provider.credentialsPresent || provider.reason?.code !== 'missing_credentials');
-        process.stdout.write(render(report, format, process.stdout.columns));
+        process.stdout.write(render(report, format, { columns: process.stdout.columns, utc: values.utc }));
         return report.providers.some(provider => provider.availability === 'available') ? 0 : 1;
     }
     catch (error) {
