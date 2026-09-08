@@ -94,7 +94,8 @@ test('CLI emits standalone JSON through an explicitly loaded provider plugin', a
   assert.ok(!first.stdout.includes('fixture-private-secret'));
   const second = await exec(process.execPath, args);
   assert.equal(JSON.parse(second.stdout).providers[0].cached, true);
-  const plain = await exec(process.execPath, [cli, '--plugin', plugin, '--provider', 'fixture', '--no-cache']);
+  // A bare word selects a provider, the same as --provider.
+  const plain = await exec(process.execPath, [cli, '--plugin', plugin, 'fixture', '--no-cache']);
   assert.ok(plain.stdout.startsWith('ASU'));
   assert.ok(!plain.stdout.includes('┌'));
   const link = join(directory, 'asu');
@@ -104,7 +105,7 @@ test('CLI emits standalone JSON through an explicitly loaded provider plugin', a
   assert.equal(linked.stdout, `${JSON.parse(await readFile('package.json', 'utf8')).version}\n`);
 });
 test('CLI errors stay on stderr with stable exit codes', async () => {
-  for (const args of [['--format', 'xml'], ['--json', '--table'], ['--provider', 'does-not-exist'], ['--unknown']]) {
+  for (const args of [['--format', 'xml'], ['--json', '--table'], ['--provider', 'does-not-exist'], ['does-not-exist'], ['--unknown']]) {
     await assert.rejects(exec(process.execPath, [cli, ...args]), error => {
       assert.equal(error.code, 2);
       assert.equal(error.stdout, '');

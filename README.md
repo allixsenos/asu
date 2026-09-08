@@ -62,8 +62,11 @@ npx --yes @allixsenos/asu --plain
 # Structured output for agents and scripts
 npx --yes @allixsenos/asu --json
 
+# One provider, by its bare name
+npx --yes @allixsenos/asu claude
+
 # Select accounts and bypass the five-minute usage cache
-npx --yes @allixsenos/asu --provider claude,codex,copilot --fresh --table
+npx --yes @allixsenos/asu claude codex copilot --fresh --table
 
 # Include every built-in provider, even if no credentials are found
 npx --yes @allixsenos/asu --all --table
@@ -342,7 +345,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
 ## CLI reference
 
 ```text
-asu [usage] [options]
+asu [usage] [provider...] [options]
 ```
 
 When you run ASU through `npx`, put the ASU options after the package name.
@@ -352,7 +355,8 @@ When you run ASU through `npx`, put the ASU options after the package name.
 | `--format plain\|table\|json` | Select one output format. Without it, a terminal gets the table, or plain text when the table would wrap. A pipe gets plain text. |
 | `--plain`, `--table`, `--json` | Shortcuts for `--format`. Use only one. |
 | `--utc` | Print full UTC timestamps in table and plain output instead of times relative to now, such as `2h30m` or `7d (Tue 15 Sep)` |
-| `--provider claude,codex` | Select provider IDs. Repeat the flag or separate the IDs with commas. |
+| `claude codex` | Select providers by their bare names, in any position. `asu claude --plain` and `asu --plain claude` are the same. |
+| `--provider claude,codex` | The same selection as a flag. Repeat the flag or separate the IDs with commas. |
 | `--all` | Include providers with no detected installation or credentials |
 | `--fresh` | Bypass cached usage. Concurrent fresh requests still share one fetch. |
 | `--no-cache` | Do not read or write the persistent cache |
