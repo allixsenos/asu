@@ -11,14 +11,18 @@ import { render, tableWraps } from './output.js';
 import { version } from './version.js';
 export const help = `asu — agent subscription usage
 
-Usage: asu [usage] [options]
+Usage: asu [usage] [provider...] [options]
+
+  asu                        Every detected provider
+  asu claude                 One provider, by its bare name
+  asu claude codex --plain   Several providers, with options anywhere
 
   --format plain|table|json   Output format (table in a terminal, plain when piped or when the table would wrap)
   --json                     Shortcut for --format json
   --plain                    Shortcut for --format plain
   --table                    Shortcut for --format table
   --utc                      Print full UTC timestamps instead of times relative to now
-  --provider <id>             Select provider; repeat or use comma-separated IDs
+  --provider <id>             Select provider; same as a bare name, repeat or use comma-separated IDs
   --all                      Include providers with no detected install or credentials
   --fresh                    Fetch again, bypassing the five-minute cache
   --no-cache                 Do not read or write the persistent cache
@@ -49,15 +53,16 @@ export async function run(args = process.argv.slice(2)) {
             process.stdout.write(`${version}\n`);
             return 0;
         }
-        if (positionals.length > 1 || positionals.length === 1 && positionals[0] !== 'usage')
-            throw new Error('Expected asu [usage]. See --help.');
+        // Bare words are provider names. A leading "usage" stays accepted for compatibility.
+        const names = positionals[0] === 'usage' ? positionals.slice(1) : positionals;
         const formats = [values.format, values.json ? 'json' : undefined, values.plain ? 'plain' : undefined, values.table ? 'table' : undefined].filter(Boolean);
         if (formats.length > 1 || formats.some(value => !['plain', 'table', 'json'].includes(value)))
             throw new Error('Choose one output format: plain, table, or json.');
         const explicit = formats.length > 0;
         format = formats[0] ?? format;
         const providers = await loadProviders(values.plugin);
-        const providerIds = values.provider?.flatMap(value => value.split(',')).map(value => value.trim());
+        const selected = [...(values.provider ?? []), ...names].flatMap(value => value.split(',')).map(value => value.trim()).filter(Boolean);
+        const providerIds = selected.length ? selected : undefined;
         if (providerIds?.some(id => !providers.some(provider => provider.id === id)))
             throw new Error('Unknown provider ID. See --help for built-ins.');
         const local = createLocalContext();
@@ -76,7 +81,7 @@ export async function run(args = process.argv.slice(2)) {
     }
     catch (error) {
         // All errors exposed here are ours; do not print plugin/import/runtime exception messages.
-        const messages = ['Expected asu [usage]. See --help.', 'Choose one output format: plain, table, or json.',
+        const messages = ['Choose one output format: plain, table, or json.',
             'Unknown provider ID. See --help for built-ins.', 'Could not load a provider plugin. Check its path, exports, and unique provider ID.'];
         const message = error instanceof Error && messages.includes(error.message) ? error.message : 'Could not run ASU. Check arguments and plugin configuration; see --help.';
         process.stderr.write(`asu: ${message}\n`);
