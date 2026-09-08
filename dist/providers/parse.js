@@ -39,8 +39,9 @@ export function timestamp(value) {
         : numeric < 100_000_000_000 ? numeric * 1000 : numeric;
     if (!Number.isFinite(ms))
         throw new UsageError('invalid_response');
+    // Providers compute reset times relative to the request, so the milliseconds jitter between calls. Whole seconds are stable enough.
     try {
-        return new Date(ms).toISOString();
+        return new Date(Math.round(ms / 1000) * 1000).toISOString();
     }
     catch {
         throw new UsageError('invalid_response');

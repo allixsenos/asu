@@ -23,7 +23,7 @@ For each entry in `providers`:
 - `availability` is `available`, `unavailable`, or `error`. Only `available` carries usage.
 - `windows` is the list of rate-limit windows. Each has `label`, `percentUsed`, and `resetsAt`. A provider can have any number of windows, in any order. Do not assume a fixed set.
 - `percentUsed` is `null` when the provider did not report it. It can exceed 100 when the provider reports overage.
-- `resetsAt` is a UTC timestamp or `null`. Time until reset is `resetsAt` minus now.
+- `resetsAt` is a UTC timestamp or `null`. Time until reset is `resetsAt` minus now. Providers compute it relative to each request, so the value can jitter by a second or more between calls, and an idle Codex window moves with the clock. Treat a change of less than a few minutes as the same reset. A real reset moves it forward by a whole window.
 - `reason.code` explains an unavailable or failed provider: `missing_credentials`, `invalid_credentials`, `unauthorized`, `timeout`, `rate_limited`, `http_error`, `invalid_response`, or `provider_error`.
 - `cached` is true when the figures come from ASU's five-minute cache. `fetchedAt` is the time of that fetch.
 

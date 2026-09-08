@@ -117,6 +117,12 @@ github.com:
   const env = { COPILOT_TOKEN: 'preferred', GITHUB_TOKEN: 'fallback' };
   assert.equal((await copilot.resolveCredentials({ ...context, env })).token, 'preferred');
 });
+test('reset timestamps round to the whole second so request jitter does not change them', () => {
+  // Claude answers 14:29:59.957Z on one call and 14:29:59.743Z on the next for the same reset.
+  for (const jittered of ['2026-09-08T14:29:59.957Z', '2026-09-08T14:29:59.743Z'])
+    assert.equal(normalizeClaude({ five_hour: { utilization: 1, resets_at: jittered } }).windows[0].resetsAt, '2026-09-08T14:30:00.000Z');
+  assert.equal(normalizeCodex({ rate_limit: { primary_window: { used_percent: 1, reset_at: 1788868800.4 } } }).windows[0].resetsAt, reset);
+});
 for (const provider of [claude, codex, copilot]) {
   test(`${provider.id} missing credentials stay missing`, async () => {
     const context = createLocalContext({ home: '/fake', platform: 'linux', env: {}, readText: async () => null });
