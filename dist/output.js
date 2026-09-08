@@ -9,14 +9,22 @@ function duration(ms) {
         return rest ? `${hours}h${rest}m` : `${hours}h`;
     return `${rest}m`;
 }
-/** A future time: the ISO timestamp with --utc, otherwise "in 2h30m", or "now" once it has passed. */
+// A duration of a day or more also names the local calendar day, because "7d" alone does not say which date that is.
+const dayParts = new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+const dayLabel = { format: (at) => {
+        const part = (type) => dayParts.formatToParts(at).find(item => item.type === type)?.value ?? '';
+        return `${part('weekday')} ${part('day')} ${part('month')}`;
+    } };
+/** A future time: the ISO timestamp with --utc, otherwise "in 2h30m" or "in 7d (Tue 15 Sep)", or "now" once it has passed. */
 function ahead(iso, options) {
     if (iso === null)
         return 'unknown';
     if (options.utc)
         return iso;
-    const diff = Date.parse(iso) - (options.now ?? Date.now());
-    return diff > 0 ? `in ${duration(diff)}` : 'now';
+    const at = Date.parse(iso), diff = at - (options.now ?? Date.now());
+    if (diff <= 0)
+        return 'now';
+    return diff < 86_400_000 ? `in ${duration(diff)}` : `in ${duration(diff)} (${dayLabel.format(at)})`;
 }
 /** A past time: the ISO timestamp with --utc, otherwise "3m ago". */
 function ago(iso, options) {

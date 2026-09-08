@@ -16,6 +16,7 @@ const report = { schemaVersion: 1, generatedAt: '2026-09-07T12:00:00.000Z', warn
   fetchedAt: '2026-09-07T12:00:00.000Z', expiresAt: '2026-09-07T12:05:00.000Z',
   windows: [{ id: 'session', label: '5 hours', percentUsed: 25, resetsAt: '2026-09-07T16:00:00.000Z' },
     { id: 'weekly', label: 'Weekly', percentUsed: 0, resetsAt: null },
+    { id: 'monthly', label: 'Monthly', percentUsed: 50, resetsAt: '2026-09-14T12:00:00.000Z' },
     { id: 'unlimited', label: 'Chat', percentUsed: null, resetsAt: null, unlimited: true }],
   balances: [{ id: 'credits', label: 'Credits', remaining: 4.5, unit: 'credits' }],
   details: [{ label: 'Extra usage', value: 'Disabled' }],
@@ -41,16 +42,19 @@ test('plain and table show times relative to now unless --utc is passed', () => 
   const plain = renderPlain(report, { now });
   assert.ok(plain.includes('5 hours: 25% used; resets in 2h30m'));
   assert.ok(plain.includes('Weekly: 0% used; resets unknown'));
+  // A reset a day or more away also names the calendar day. Noon UTC keeps the day stable across time zones.
+  assert.ok(plain.includes('Monthly: 50% used; resets in 6d22h (Mon 14 Sep)'));
   assert.ok(plain.includes('Fetched 1h30m ago; fresh; expires now'));
   const table = renderTable(report, { now });
   assert.ok(table.includes('Resets in'));
   assert.ok(table.includes('│ 2h30m'));
+  assert.ok(table.includes('│ 6d22h (Mon 14 Sep)'));
   assert.ok(table.includes('│ Unknown'));
   assert.ok(table.includes('Fetched 1h30m ago; cache expires now.'));
   const soon = renderPlain(report, { now: Date.parse('2026-09-07T12:00:20.000Z') });
   assert.ok(soon.includes('Fetched <1m ago; fresh; expires in 5m'));
   const late = renderPlain(report, { now: Date.parse('2026-09-04T10:00:00.000Z') });
-  assert.ok(late.includes('resets in 3d6h'));
+  assert.match(late, /resets in 3d6h \((Mon 7|Tue 8) Sep\)/);
   assert.ok(!JSON.parse(render(report, 'json', { now })).providers[0].windows[0].resetsAt.includes('in '));
 });
 test('table wraps rather than dropping values in narrow terminals', () => {
