@@ -404,7 +404,7 @@ A consumer must examine `schemaVersion` before it processes a report. Version 1 
 | `details` | Additional normalized label and value pairs |
 | `fetchedAt`, `expiresAt`, `cached` | Timestamp and freshness of each provider snapshot |
 
-An unknown percentage or reset time is `null`. A missing quantity or balance does not mean zero. An unlimited allowance is explicit. A percentage can exceed 100 if a provider reports overage. Do not assume a fixed number or order of windows. See the [report contract](docs/architecture.md#report-contract) and the [schemas](src/models.ts) for the full model. An agent that wants to watch its own budget can follow [Use ASU from an agent](docs/agent-usage.md).
+An unknown percentage or reset time is `null`. A missing quantity or balance does not mean zero. An unlimited allowance is explicit. A percentage can exceed 100 if a provider reports overage. Do not assume a fixed number or order of windows. See the [report contract](docs/architecture.md#report-contract) and the [schemas](src/models.ts) for the full model. An agent that wants to watch its own budget can follow [Use ASU from an agent](docs/agent-usage.md). The [asu-usage skill](skills/asu-usage/SKILL.md) measures what one command costs, and `npx skills add allixsenos/asu` installs it.
 
 ## Supported providers
 
