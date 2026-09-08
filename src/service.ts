@@ -7,6 +7,7 @@ import type { LocalContext } from './local.js';
 import { createTransport } from './transport.js';
 import type { RequestJson } from './transport.js';
 import type { Credentials, Provider } from './providers/base.js';
+import { version } from './version.js';
 
 export interface ServiceOptions {
   local?: LocalContext;
@@ -56,7 +57,7 @@ export class UsageService {
   async collect(options: { providerIds?: string[]; fresh?: boolean } = {}): Promise<UsageReport> {
     const selected = options.providerIds?.length ? this.providers.filter(p => options.providerIds!.includes(p.id)) : this.providers;
     const providers = await Promise.all(selected.map(provider => this.collectProvider(provider, options.fresh ?? false)));
-    return { schemaVersion: 1, generatedAt: new Date(this.now()).toISOString(), warnings: [...this.cache.warnings], providers };
+    return { schemaVersion: 1, asuVersion: version, generatedAt: new Date(this.now()).toISOString(), warnings: [...this.cache.warnings], providers };
   }
   private result(provider: Provider, installed: boolean | null, credentialsPresent: boolean, error?: unknown): ProviderUsage {
     const reason = error ? safeReason(error) : null;

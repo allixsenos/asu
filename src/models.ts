@@ -50,6 +50,8 @@ export const providerUsageSchema = usageDataSchema.extend({
 });
 export const reportSchema = z.object({
   schemaVersion: z.literal(1),
+  /** The ASU package version that wrote the report. Additive; the schema version stays 1. */
+  asuVersion: z.string(),
   generatedAt: timestamp,
   warnings: z.array(displayText),
   providers: z.array(providerUsageSchema),

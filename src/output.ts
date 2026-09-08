@@ -63,7 +63,7 @@ function status(provider: ProviderUsage): string {
   return provider.installed === false ? 'not installed' : 'not logged in';
 }
 export function renderPlain(report: UsageReport, options: RenderOptions = {}): string {
-  const lines = [`ASU · ${report.generatedAt}`];
+  const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`];
   for (const provider of report.providers) {
     lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`,
       `  ${status(provider)}`);
@@ -115,7 +115,7 @@ function buildTable(report: UsageReport, options: RenderOptions): { text: string
     widths[index] = widths[index]! - 1;
   }
   const border = (left: string, middle: string, right: string) => left + widths.map(w => '─'.repeat(w + 2)).join(middle) + right;
-  const lines = [`ASU · ${report.generatedAt}`, border('┌', '┬', '┐')];
+  const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`, border('┌', '┬', '┐')];
   function row(cells: string[]) {
     const wrappedCells = cells.map((cell, i) => wrap(cell, widths[i]!));
     // Intentional line breaks inside a cell are not wrapping. Extra lines beyond them are.
