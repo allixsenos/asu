@@ -1,3 +1,27 @@
+function duration(ms) {
+    const minutes = Math.round(ms / 60_000);
+    if (minutes < 1)
+        return '<1m';
+    const days = Math.floor(minutes / 1440), hours = Math.floor(minutes % 1440 / 60), rest = minutes % 60;
+    if (days)
+        return hours ? `${days}d${hours}h` : `${days}d`;
+    if (hours)
+        return rest ? `${hours}h${rest}m` : `${hours}h`;
+    return `${rest}m`;
+}
+/** A future time: the ISO timestamp with --utc, otherwise "in 2h30m", or "now" once it has passed. */
+function ahead(iso, options) {
+    if (iso === null)
+        return 'unknown';
+    if (options.utc)
+        return iso;
+    const diff = Date.parse(iso) - (options.now ?? Date.now());
+    return diff > 0 ? `in ${duration(diff)}` : 'now';
+}
+/** A past time: the ISO timestamp with --utc, otherwise "3m ago". */
+function ago(iso, options) {
+    return options.utc ? iso : `${duration(Math.max(0, (options.now ?? Date.now()) - Date.parse(iso)))} ago`;
+}
 const amount = (value) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
 const yesNo = (value) => value === null ? 'unknown' : value ? 'yes' : 'no';
 function windowValue(window) {
@@ -25,21 +49,21 @@ function balanceValue(balance) {
 function providerSummary(provider) {
     return `installed: ${yesNo(provider.installed)}, authenticated: ${yesNo(provider.authenticated)}`;
 }
-export function renderPlain(report) {
+export function renderPlain(report, options = {}) {
     const lines = [`ASU · ${report.generatedAt}`];
     for (const provider of report.providers) {
         lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`, `  ${provider.availability}; ${providerSummary(provider)}`);
         if (provider.planLabel)
             lines.push(`  Plan: ${provider.planLabel}`);
         for (const window of provider.windows)
-            lines.push(`  ${window.label}: ${windowValue(window)}; resets ${window.resetsAt ?? 'unknown'}`);
+            lines.push(`  ${window.label}: ${windowValue(window)}; resets ${ahead(window.resetsAt, options)}`);
         for (const balance of provider.balances)
             lines.push(`  ${balance.label}: ${balanceValue(balance)}`);
         for (const detail of provider.details)
             lines.push(`  ${detail.label}: ${detail.value}`);
         if (provider.reason)
             lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
-        lines.push(`  Fetched ${provider.fetchedAt}; ${provider.cached ? 'cached' : 'fresh'}; expires ${provider.expiresAt}`);
+        lines.push(`  Fetched ${ago(provider.fetchedAt, options)}; ${provider.cached ? 'cached' : 'fresh'}; expires ${ahead(provider.expiresAt, options)}`);
     }
     if (!report.providers.length)
         lines.push('', 'No supported agents or credentials detected. Use --all to list every provider.');
@@ -75,9 +99,9 @@ function wrap(text, columns) {
     }
     return lines;
 }
-export function renderTable(report, columns = 110) {
+export function renderTable(report, options = {}) {
     const widths = [16, 18, 25, 24, 18];
-    const target = Math.max(60, Math.min(180, columns));
+    const target = Math.max(60, Math.min(180, options.columns ?? 110));
     const minima = [8, 9, 10, 10, 7];
     while (widths.reduce((sum, value) => sum + value, 16) > target) {
         let index = -1;
@@ -99,11 +123,12 @@ export function renderTable(report, columns = 110) {
                 return value + ' '.repeat(widths[i] - textWidth(value));
             }).join(' │ ') + ' │');
     }
-    row(['Provider', 'Plan / status', 'Window / balance', 'Usage', 'Resets (UTC)']);
+    row(['Provider', 'Plan / status', 'Window / balance', 'Usage', options.utc ? 'Resets (UTC)' : 'Resets in']);
     for (const provider of report.providers) {
         lines.push(border('├', '┼', '┤'));
         const rows = provider.windows.map(window => [window.label, windowValue(window).replaceAll('; ', '\n'),
-            window.resetsAt ? window.resetsAt.replace('T', ' ').slice(0, 16) : 'Unknown']);
+            options.utc && window.resetsAt ? window.resetsAt.replace('T', ' ').slice(0, 16)
+                : ahead(window.resetsAt, options).replace(/^in /, '').replace(/^\w/, char => char.toUpperCase())]);
         rows.push(...provider.balances.map(balance => [balance.label, balanceValue(balance).replaceAll('; ', '\n'), '—']));
         if (!rows.length)
             rows.push(['—', '—', '—']);
@@ -114,7 +139,7 @@ export function renderTable(report, columns = 110) {
     if (!report.providers.length)
         lines.push('No supported agents or credentials detected. Use --all to list every provider.');
     for (const provider of report.providers) {
-        lines.push(`${provider.displayName}: ${providerSummary(provider)}. Fetched ${provider.fetchedAt}; cache expires ${provider.expiresAt}.`);
+        lines.push(`${provider.displayName}: ${providerSummary(provider)}. Fetched ${ago(provider.fetchedAt, options)}; cache expires ${ahead(provider.expiresAt, options)}.`);
         if (provider.reason)
             lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
         for (const detail of provider.details)
@@ -126,7 +151,7 @@ export function renderTable(report, columns = 110) {
         lines.push(`Warning: ${warning}`);
     return lines.join('\n') + '\n';
 }
-export function render(report, format, columns) {
-    return format === 'json' ? JSON.stringify(report, null, 2) + '\n' : format === 'table' ? renderTable(report, columns) : renderPlain(report);
+export function render(report, format, options = {}) {
+    return format === 'json' ? JSON.stringify(report, null, 2) + '\n' : format === 'table' ? renderTable(report, options) : renderPlain(report, options);
 }
 //# sourceMappingURL=output.js.map

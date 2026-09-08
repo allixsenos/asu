@@ -46,7 +46,9 @@ The capture used the local checkout:
 node dist/cli.js --provider claude,codex,copilot --fresh --no-cache --json
 ```
 
-ASU's own renderers made the table and the plain text below from that same JSON snapshot, so all three examples show identical data. The examples include no credentials and no account identifiers. All reset times are UTC.
+ASU's own renderers made the table and the plain text below from that same JSON snapshot with `--utc`, so all three examples show identical data. The examples include no credentials and no account identifiers. All reset times are UTC.
+
+Without `--utc`, the table and the plain text show reset, fetch, and expiry times relative to now, for example `2h30m`, `45m`, or `3d6h`. A reset time that already passed shows as `now`. JSON always contains the full UTC timestamps.
 
 ### Pretty table
 
@@ -131,7 +133,7 @@ GitHub Copilot (copilot)
 
 ### JSON
 
-Use `--json` for agents and scripts. Stdout contains the report. An ASU invocation error goes to stderr. The human output rounds quantities to two decimal places. JSON keeps the normalized numeric precision.
+Use `--json` for agents and scripts. Stdout contains the report. An ASU invocation error goes to stderr. The human output rounds quantities to two decimal places and shows relative times. JSON keeps the normalized numeric precision and the full UTC timestamps.
 
 <details>
 <summary>Show the complete version 1 JSON report</summary>
@@ -306,6 +308,7 @@ When you run ASU through `npx`, put the ASU options after the package URL.
 | --- | --- |
 | `--format plain\|table\|json` | Select one output format |
 | `--plain`, `--table`, `--json` | Shortcuts for `--format`. Use only one. |
+| `--utc` | Print full UTC timestamps in table and plain output instead of times relative to now, such as `2h30m` |
 | `--provider claude,codex` | Select provider IDs. Repeat the flag or separate the IDs with commas. |
 | `--all` | Include providers with no detected installation or credentials |
 | `--fresh` | Bypass cached usage. Concurrent fresh requests still share one fetch. |
