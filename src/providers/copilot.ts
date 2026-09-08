@@ -12,7 +12,6 @@ export function normalizeCopilot(payload: unknown): UsageData {
   const plan = string(raw.copilot_plan);
   data.planLabel = plan ? title(plan) : null;
   const resetsAt = timestamp(raw.quota_reset_date);
-  if (resetsAt) data.details.push({ label: 'Quota reset', value: resetsAt });
   for (const [name, value] of Object.entries(optionalObject(raw.quota_snapshots))) {
     const quota = object(value), unlimited = quota.unlimited === true || quota.entitlement === -1 || quota.entitlement === '-1';
     const remainingPercent = nonnegative(quota.percent_remaining);
@@ -24,10 +23,12 @@ export function normalizeCopilot(payload: unknown): UsageData {
     data.windows.push({ id: slug(name), label: title(name), percentUsed, used, limit, unlimited,
       resetsAt: timestamp(quota.reset_date) ?? resetsAt, unit: 'requests' });
   }
+  // Each window carries the reset date. The detail only matters for a plan-only response.
+  if (resetsAt && !data.windows.length) data.details.push({ label: 'Quota reset', value: resetsAt });
   return requireUsage(data);
 }
 export const copilot: Provider = {
-  id: 'copilot', displayName: 'GitHub Copilot', version: 1,
+  id: 'copilot', displayName: 'GitHub Copilot', version: 2,
   // gh alone is not proof that Copilot is installed.
   detect: context => detectCommands(context, ['copilot', 'github-copilot']),
   async resolveCredentials(context) {

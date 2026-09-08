@@ -88,10 +88,14 @@ test('Copilot plan-only responses do not invent usage, quotas preserve unlimited
   const result = normalizeCopilot({ copilot_plan: 'individual', quota_reset_date: '2026-10-01' });
   assert.deepEqual(result.windows, []);
   assert.equal(result.details[0].value, '2026-10-01T00:00:00.000Z');
-  const quotas = normalizeCopilot({ quota_snapshots: {
+  const withQuotas = normalizeCopilot({ quota_reset_date: '2026-10-01', quota_snapshots: {
     premium_interactions: { entitlement: 300, percent_remaining: 70 },
     chat: { entitlement: -1, unlimited: true }, incomplete: { reset_date: reset },
-  } }).windows;
+  } });
+  // With quota windows, the reset date lives on each window and is not repeated as a detail.
+  assert.deepEqual(withQuotas.details, []);
+  assert.equal(withQuotas.windows[0].resetsAt, '2026-10-01T00:00:00.000Z');
+  const quotas = withQuotas.windows;
   assert.equal(quotas.length, 2);
   assert.equal(quotas[0].percentUsed, 30);
   assert.equal(quotas[0].used, undefined);

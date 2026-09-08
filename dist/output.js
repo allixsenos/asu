@@ -145,10 +145,16 @@ function buildTable(report, options) {
     row(['Provider', 'Plan / status', 'Window / balance', 'Usage', options.utc ? 'Resets (UTC)' : 'Resets in']);
     for (const provider of report.providers) {
         lines.push(border('├', '┼', '┤'));
+        const timeCell = (text) => text.replace(/^in /, '').replace(/^\w/, char => char.toUpperCase());
         const rows = provider.windows.map(window => [window.label, windowValue(window).replaceAll('; ', '\n'),
-            options.utc && window.resetsAt ? window.resetsAt.replace('T', ' ').slice(0, 16)
-                : ahead(window.resetsAt, options).replace(/^in /, '').replace(/^\w/, char => char.toUpperCase())]);
+            options.utc && window.resetsAt ? window.resetsAt.replace('T', ' ').slice(0, 16) : timeCell(ahead(window.resetsAt, options))]);
         rows.push(...provider.balances.map(balance => [balance.label, balanceValue(balance).replaceAll('; ', '\n'), '—']));
+        // Details are rows too. A timestamp detail lines up with the other dates in the last column.
+        rows.push(...provider.details.map(detail => isoTimestamp.test(detail.value)
+            ? [detail.label, '—', options.utc ? detail.value.replace('T', ' ').slice(0, 16) : timeCell(detailValue(detail.value, options))]
+            : [detail.label, detail.value, '—']));
+        if (provider.reason)
+            rows.push(['Reason', provider.reason.code, '—']);
         if (!rows.length)
             rows.push(['—', '—', '—']);
         rows.forEach((cells, index) => row([index ? '' : provider.displayName + (provider.experimental ? ' *' : ''),
@@ -157,12 +163,10 @@ function buildTable(report, options) {
     lines.push(border('└', '┴', '┘'));
     if (!report.providers.length)
         lines.push('No supported agents or credentials detected. Use --all to list every provider.');
+    // The footer is bookkeeping only. Usage, details, and the reason code are rows in the table.
     for (const provider of report.providers) {
-        lines.push(`${provider.displayName}: ${providerSummary(provider)}. Fetched ${ago(provider.fetchedAt, options)}; cache expires ${ahead(provider.expiresAt, options)}.`);
-        if (provider.reason)
-            lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
-        for (const detail of provider.details)
-            lines.push(`  ${detail.label}: ${detailValue(detail.value, options)}`);
+        lines.push(`${provider.displayName}: fetched ${ago(provider.fetchedAt, options)}; cache expires ${ahead(provider.expiresAt, options)}.`
+            + (provider.reason ? ` ${provider.reason.message}` : ''));
     }
     if (report.providers.some(p => p.experimental))
         lines.push('* Experimental adapter: fixture-tested, not verified against a live subscription.');
