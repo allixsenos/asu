@@ -4,43 +4,80 @@ See how much of your coding-agent subscription you used, straight from the provi
 
 ASU is a local TypeScript CLI for humans and agents. It finds supported installations and credentials, fetches usage from each provider concurrently, and prints a table, plain text, or versioned JSON. Each provider has its own adapter. A failed provider does not hide the results of the other providers.
 
-## Quick start
-
-ASU needs **Node.js 22.13 or newer**, npm, and Git. Sign in through the provider's own CLI first.
-
-```bash
-npx --yes github:allixsenos/asu --table
-```
-
-This runs the current `main` branch. The repository commits the built `dist/` directory, so the install needs no build step and no token. To run a released version instead, use the tarball of the newest [GitHub release](https://github.com/allixsenos/asu/releases):
-
-```bash
-npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --table
-```
-
-Released versions are also on npm as [`@allixsenos/asu`](https://www.npmjs.com/package/@allixsenos/asu):
+## What it looks like
 
 ```bash
 npx --yes @allixsenos/asu --table
 ```
 
-Your provider credentials, which are separate, let ASU read usage.
+```text
+ASU · 2026-09-08T09:22:58.225Z
+┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
+│ Provider         │ Plan / status      │ Window / balance      │ Usage                 │ Resets in          │
+├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
+│ Claude           │ Max 20x            │ 5 hours               │ 22% used              │ 7m                 │
+│                  │ available          │                       │                       │                    │
+│                  │ fresh              │                       │                       │                    │
+│                  │                    │ Weekly                │ 5% used               │ 6d19h (Tue 15 Sep) │
+│                  │                    │ Weekly · Fable        │ 7% used               │ 6d19h (Tue 15 Sep) │
+│                  │                    │ Extra usage           │ Disabled              │ —                  │
+├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
+│ Codex            │ Plus               │ 5 hours               │ 0% used               │ 5h                 │
+│                  │ available          │                       │                       │                    │
+│                  │ fresh              │                       │                       │                    │
+│                  │                    │ Weekly                │ 0% used               │ 7d (Tue 15 Sep)    │
+│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 7d (Tue 15 Sep)    │
+│                  │                    │ Credits               │ 0 credits left        │ —                  │
+│                  │                    │ Credits available     │ No                    │ —                  │
+├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
+│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 22d14h (Thu 1 Oct) │
+│                  │ available          │                       │ 0 / 200 requests      │                    │
+│                  │ fresh              │                       │                       │                    │
+│                  │                    │ Completions           │ 0% used               │ 22d14h (Thu 1 Oct) │
+│                  │                    │                       │ 0 / 2,000 requests    │                    │
+│                  │                    │ Premium Interactions  │ 100% used             │ 22d14h (Thu 1 Oct) │
+│                  │                    │                       │ 0 / 0 requests        │                    │
+└──────────────────┴────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
+Claude: fetched <1m ago; cache expires in 5m.
+Codex: fetched <1m ago; cache expires in 5m.
+GitHub Copilot: fetched <1m ago; cache expires in 5m.
+```
+
+This is a real run against the maintainer's accounts on 2026-09-08. Reset times are relative to the moment of the run. Pass `--utc` for full timestamps, `--plain` for log-friendly text, or `--json` for agents and scripts.
+
+## Quick start
+
+ASU needs **Node.js 22.13 or newer** and npm. Sign in through the provider's own CLI first.
+
+```bash
+npx --yes @allixsenos/asu --table
+```
+
+This runs the newest release of [`@allixsenos/asu`](https://www.npmjs.com/package/@allixsenos/asu) from npm. No token is needed. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
-npx --yes github:allixsenos/asu --plain
+npx --yes @allixsenos/asu --plain
 
 # Structured output for agents and scripts
-npx --yes github:allixsenos/asu --json
+npx --yes @allixsenos/asu --json
 
 # Select accounts and bypass the five-minute usage cache
-npx --yes github:allixsenos/asu --provider claude,codex,copilot --fresh --table
+npx --yes @allixsenos/asu --provider claude,codex,copilot --fresh --table
 
 # Include every built-in provider, even if no credentials are found
-npx --yes github:allixsenos/asu --all --table
+npx --yes @allixsenos/asu --all --table
 ```
 
-For SSH, use `git+ssh://git@github.com/allixsenos/asu.git#main` in place of `github:allixsenos/asu`. For reproducible automation, pin a reviewed commit SHA or tag, for example `github:allixsenos/asu#v0.1.0`. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
+To pin a version, name it, for example `@allixsenos/asu@0.3.0`. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
+
+### Run the unreleased main branch
+
+```bash
+npx --yes github:allixsenos/asu --table
+```
+
+This needs Git. The repository commits the built `dist/` directory, so the install needs no build step. For SSH, use `git+ssh://git@github.com/allixsenos/asu.git#main`. To pin a commit or a tag, append it, for example `github:allixsenos/asu#v0.3.0`. Each GitHub release also carries the packed tarball, and `npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --table` runs the newest one.
 
 ## Real account output
 
@@ -308,7 +345,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
 asu [usage] [options]
 ```
 
-When you run ASU through `npx`, put the ASU options after the package URL.
+When you run ASU through `npx`, put the ASU options after the package name.
 
 | Option | Behavior |
 | --- | --- |
@@ -339,7 +376,7 @@ A zero exit code does not mean that every provider succeeded. When you automate 
 ### Use JSON in scripts
 
 ```bash
-npx --yes github:allixsenos/asu --json > usage.json
+npx --yes @allixsenos/asu --json > usage.json
 jq '.providers[] | {providerId, availability, planLabel, windows}' usage.json
 
 # Find available providers with a window at or above 80% used
@@ -448,7 +485,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 A provider is an ESM module with a unique ID, a version, and three operations: detect the installation, resolve the credentials, and fetch normalized usage. An adapter owns its credential format and its API contract. The shared service and the renderers stay provider-independent.
 
 ```bash
-npx --yes github:allixsenos/asu --plugin ./my-provider.mjs --provider my-provider --json
+npx --yes @allixsenos/asu --plugin ./my-provider.mjs --provider my-provider --json
 ```
 
 A plugin can export `default` or `provider`. ASU resolves an installed package name from the current working directory. A plugin is local code that you load explicitly, and it has full access to the process. Load only modules that you trust. ASU does not download plugins and does not search for them. See the [plugin contract and example](docs/architecture.md#external-plugin-example) for the details. The package also exports its service, schemas, and TypeScript types as a library.
