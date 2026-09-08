@@ -29,9 +29,9 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test test/*.test.mjs",
+    "test": "npm run compile && node --test test/*.test.mjs",
     "start": "node dist/cli.js"
   },
   "dependencies": {

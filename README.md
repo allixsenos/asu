@@ -425,7 +425,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 | --- | --- |
 | GitHub says the repository is missing or access is denied | Examine your Git access with `git ls-remote https://github.com/allixsenos/asu.git HEAD`. The SSH URL needs a GitHub SSH key. |
 | The Git install fails during `prepare` | Examine the Node version, the dependency-registry access, and whether npm permits build scripts. See the local checkout instructions below. |
-| `npx` exits with code 1 and prints nothing, or npm 9 reports `could not determine executable to run` | npm 9 cannot run a `prepare` script for a Git install through `npx`. ASU commits `dist/` and has no `prepare` script, so a current checkout does not hit this. Clear the npx cache with `rm -rf ~/.npm/_npx` and retry, or use the release tarball URL. |
+| `npx` exits with code 1 and prints nothing, or npm 9 reports `could not determine executable to run` | npm 9 cannot run the nested install that a Git dependency with a `build` or `prepare` script needs through `npx`. ASU commits `dist/` and has neither script, so a current checkout does not hit this. Clear the npx cache with `rm -rf ~/.npm/_npx` and retry, or use the release tarball URL. |
 | No supported agents or credentials detected | Use `--all`, examine the credential sources above, and examine the home-directory overrides and `PATH`. |
 | `missing_credentials`, `invalid_credentials`, or `unauthorized` | Sign in or refresh through the provider's CLI, then run ASU again with `--fresh`. A successful CLI login helps only if ASU supports its credential store. |
 | `credential_read_error` | Make sure that your current user can read the credential file or store. |
@@ -452,7 +452,7 @@ cd asu
 npm ci
 
 # dist/ is committed. Rebuild after you edit TypeScript and commit the result.
-npm run build
+npm run compile
 node dist/cli.js --table
 node dist/cli.js --provider claude,codex,copilot --fresh --json
 
