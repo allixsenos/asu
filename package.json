@@ -26,7 +26,8 @@
   },
   "license": "UNLICENSED",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "scripts": {
     "compile": "tsc -p tsconfig.json",

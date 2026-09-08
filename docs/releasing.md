@@ -1,6 +1,6 @@
 # Releasing
 
-[release-please](https://github.com/googleapis/release-please) drives releases from the Conventional Commit history. A release is a Git tag on `main`, a GitHub release with the packed tarball attached, and a package in [GitHub Packages](https://github.com/allixsenos/asu/pkgs/npm/asu). Nothing goes to the public npm registry.
+[release-please](https://github.com/googleapis/release-please) drives releases from the Conventional Commit history. A release is a Git tag on `main`, a GitHub release with the packed tarball attached, and a version of [`@allixsenos/asu`](https://www.npmjs.com/package/@allixsenos/asu) on the public npm registry.
 
 ## How a release happens
 
@@ -8,7 +8,21 @@
 2. release-please opens or updates a pull request named `chore(main): release <version>`. The PR bumps `package.json` and `package-lock.json` and writes the new `CHANGELOG.md` section.
 3. Review the PR and squash merge it.
 4. release-please then creates the tag `v<version>` and the GitHub release.
-5. The `publish` job checks out the tag, runs the checks and tests, packs the tarball, smoke tests it, attaches it to the release, and runs `npm publish` against GitHub Packages.
+5. The `publish` job checks out the tag, runs the checks and tests, packs the tarball, smoke tests it, attaches it to the release, and runs `npm publish --access public` against the npm registry.
+
+## npm trusted publishing
+
+The workflow holds no npm token. npm trusts the `release.yml` workflow of this repository through GitHub's OIDC identity, and npm attaches provenance to each version. The job needs the `id-token: write` permission and npm 11.5.1 or newer, so the job installs the latest npm before it publishes.
+
+npm reads the trusted publisher from the package settings, so the package must exist before the workflow can publish it. The first publish is a manual step by the owner:
+
+1. Make sure the npm account owns the `@allixsenos` scope. The scope must equal the npm username, or the name of an npm organization the account created.
+2. Run `npm login` on a machine with the repository checked out at the release tag.
+3. Run `npm publish --access public` from the repository root. npm asks for the one-time 2FA code.
+4. On npmjs.com, open the package, then Settings, then "Trusted Publisher". Choose GitHub Actions and enter the user `allixsenos`, the repository `asu`, and the workflow filename `release.yml`. Leave the environment empty.
+5. Optional: in "Publishing access", choose "Require two-factor authentication and disallow tokens". Trusted publishing keeps working, and a leaked token can no longer publish.
+
+After that, every release publishes on its own.
 
 ## Version rules
 
@@ -28,17 +42,10 @@
 
 ## Install a released version
 
-Add these lines to `~/.npmrc`, with a personal access token that has the `read:packages` scope:
-
-```text
-@allixsenos:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=TOKEN
-```
-
-Then run:
-
 ```bash
-npx @allixsenos/asu --table
+npx --yes @allixsenos/asu --table
 ```
+
+No token is needed. The package is public on the npm registry.
 
 Each GitHub release also carries the tarball twice: as `allixsenos-asu-<version>.tgz` and as `asu.tgz`. The second name gives `https://github.com/allixsenos/asu/releases/latest/download/asu.tgz` a stable URL for the newest release. Both work with `npx --yes <url>` and with `npm install <url>`, and neither needs a token or a build step.

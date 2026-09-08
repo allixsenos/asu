@@ -26,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
+      # id-token lets npm verify this workflow through OIDC. No npm token is stored anywhere.
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -35,8 +36,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: https://npm.pkg.github.com
-          scope: '@allixsenos'
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or newer. Node 22 ships an older npm.
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run check
       - run: npm test
@@ -49,7 +51,5 @@ jobs:
           gh release upload "${{ needs.release-please.outputs.tag_name }}" "$TARBALL" asu.tgz
         env:
           GH_TOKEN: ${{ github.token }}
-      - name: Publish to GitHub Packages
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to npm through the trusted publisher
+        run: npm publish --access public
