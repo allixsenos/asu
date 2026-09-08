@@ -52,12 +52,16 @@ test('plain and table show times relative to now unless --utc is passed', () => 
   assert.ok(plain.includes('Since: 1h30m ago'));
   assert.ok(plain.includes('Extra usage: Disabled'));
   const table = renderTable(report, { now });
-  assert.ok(table.includes('  Quota reset: in 6d22h (Mon 14 Sep)'));
+  // Details are table rows. A timestamp detail sits in the last column, a text detail in the usage column.
+  assert.match(table, /│ Quota reset\s+│ —\s+│ 6d22h \(Mon 14 Sep\)/);
+  assert.match(table, /│ Since\s+│ —\s+│ 1h30m ago/);
+  assert.match(table, /│ Extra usage\s+│ Disabled\s+│ —/);
+  assert.ok(!table.includes('  Extra usage: Disabled'));
   assert.ok(table.includes('Resets in'));
   assert.ok(table.includes('│ 2h30m'));
   assert.ok(table.includes('│ 6d22h (Mon 14 Sep)'));
   assert.ok(table.includes('│ Unknown'));
-  assert.ok(table.includes('Fetched 1h30m ago; cache expires now.'));
+  assert.ok(table.includes('Example: fetched 1h30m ago; cache expires now.'));
   const soon = renderPlain(report, { now: Date.parse('2026-09-07T12:00:20.000Z') });
   assert.ok(soon.includes('Fetched <1m ago; fresh; expires in 5m'));
   const late = renderPlain(report, { now: Date.parse('2026-09-04T10:00:00.000Z') });
