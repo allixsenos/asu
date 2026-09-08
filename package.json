@@ -24,9 +24,10 @@
     "type": "git",
     "url": "git+https://github.com/allixsenos/asu.git"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "scripts": {
     "compile": "tsc -p tsconfig.json",

@@ -18,7 +18,13 @@ This runs the current `main` branch. The repository commits the built `dist/` di
 npx --yes https://github.com/allixsenos/asu/releases/latest/download/asu.tgz --table
 ```
 
-Released versions are also on GitHub Packages, not on the public npm registry. See [Releasing](docs/releasing.md) for the `.npmrc` lines. Your provider credentials, which are separate, let ASU read usage.
+Released versions are also on npm as [`@allixsenos/asu`](https://www.npmjs.com/package/@allixsenos/asu):
+
+```bash
+npx --yes @allixsenos/asu --table
+```
+
+Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
@@ -484,8 +490,8 @@ Conventional Commits are mandatory. Prefer small, scoped commits and squash merg
 
 ## Releases
 
-release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release from the commit history. [Releasing](docs/releasing.md) describes the release pull request, the GitHub release with the packed tarball, and the GitHub Packages publication.
+release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release from the commit history. [Releasing](docs/releasing.md) describes the release pull request, the GitHub release with the packed tarball, and the npm publication.
 
 ## Project status
 
-Public repository. The package is `UNLICENSED`, so the owner keeps all rights until a license is added. The release workflow publishes it only to GitHub Packages. Only the owner can decide to publish to the public npm registry.
+Public repository under the [MIT license](LICENSE). The release workflow publishes the package to the public npm registry.
