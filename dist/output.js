@@ -30,6 +30,13 @@ function ahead(iso, options) {
 function ago(iso, options) {
     return options.utc ? iso : `${duration(Math.max(0, (options.now ?? Date.now()) - Date.parse(iso)))} ago`;
 }
+const isoTimestamp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+/** A detail value that is an ISO timestamp reads like any other time. Anything else prints as is. */
+function detailValue(value, options) {
+    if (!isoTimestamp.test(value))
+        return value;
+    return Date.parse(value) > (options.now ?? Date.now()) ? ahead(value, options) : ago(value, options);
+}
 const amount = (value) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
 const yesNo = (value) => value === null ? 'unknown' : value ? 'yes' : 'no';
 function windowValue(window) {
@@ -68,7 +75,7 @@ export function renderPlain(report, options = {}) {
         for (const balance of provider.balances)
             lines.push(`  ${balance.label}: ${balanceValue(balance)}`);
         for (const detail of provider.details)
-            lines.push(`  ${detail.label}: ${detail.value}`);
+            lines.push(`  ${detail.label}: ${detailValue(detail.value, options)}`);
         if (provider.reason)
             lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
         lines.push(`  Fetched ${ago(provider.fetchedAt, options)}; ${provider.cached ? 'cached' : 'fresh'}; expires ${ahead(provider.expiresAt, options)}`);
@@ -107,7 +114,8 @@ function wrap(text, columns) {
     }
     return lines;
 }
-export function renderTable(report, options = {}) {
+function buildTable(report, options) {
+    let wrapped = false;
     const widths = [16, 18, 25, 24, 18];
     const target = Math.max(60, Math.min(180, options.columns ?? 110));
     const minima = [8, 9, 10, 10, 7];
@@ -123,10 +131,13 @@ export function renderTable(report, options = {}) {
     const border = (left, middle, right) => left + widths.map(w => '─'.repeat(w + 2)).join(middle) + right;
     const lines = [`ASU · ${report.generatedAt}`, border('┌', '┬', '┐')];
     function row(cells) {
-        const wrapped = cells.map((cell, i) => wrap(cell, widths[i]));
-        const height = Math.max(...wrapped.map(cell => cell.length));
+        const wrappedCells = cells.map((cell, i) => wrap(cell, widths[i]));
+        // Intentional line breaks inside a cell are not wrapping. Extra lines beyond them are.
+        if (wrappedCells.some((cell, i) => cell.length > cells[i].split('\n').length))
+            wrapped = true;
+        const height = Math.max(...wrappedCells.map(cell => cell.length));
         for (let line = 0; line < height; line++)
-            lines.push('│ ' + wrapped.map((cell, i) => {
+            lines.push('│ ' + wrappedCells.map((cell, i) => {
                 const value = cell[line] ?? '';
                 return value + ' '.repeat(widths[i] - textWidth(value));
             }).join(' │ ') + ' │');
@@ -151,13 +162,20 @@ export function renderTable(report, options = {}) {
         if (provider.reason)
             lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
         for (const detail of provider.details)
-            lines.push(`  ${detail.label}: ${detail.value}`);
+            lines.push(`  ${detail.label}: ${detailValue(detail.value, options)}`);
     }
     if (report.providers.some(p => p.experimental))
         lines.push('* Experimental adapter: fixture-tested, not verified against a live subscription.');
     for (const warning of report.warnings)
         lines.push(`Warning: ${warning}`);
-    return lines.join('\n') + '\n';
+    return { text: lines.join('\n') + '\n', wrapped };
+}
+export function renderTable(report, options = {}) {
+    return buildTable(report, options).text;
+}
+/** True when a cell would wrap at this width. The CLI then prefers plain output unless the table was requested. */
+export function tableWraps(report, options = {}) {
+    return buildTable(report, options).wrapped;
 }
 export function render(report, format, options = {}) {
     return format === 'json' ? JSON.stringify(report, null, 2) + '\n' : format === 'table' ? renderTable(report, options) : renderPlain(report, options);

@@ -7,13 +7,13 @@ import { UsageCache } from './cache.js';
 import { createLocalContext, homePath } from './local.js';
 import { loadProviders } from './registry.js';
 import { UsageService } from './service.js';
-import { render } from './output.js';
+import { render, tableWraps } from './output.js';
 import { version } from './version.js';
 export const help = `asu — agent subscription usage
 
 Usage: asu [usage] [options]
 
-  --format plain|table|json   Output format (table in a terminal, plain when piped)
+  --format plain|table|json   Output format (table in a terminal, plain when piped or when the table would wrap)
   --json                     Shortcut for --format json
   --plain                    Shortcut for --format plain
   --table                    Shortcut for --format table
@@ -54,6 +54,7 @@ export async function run(args = process.argv.slice(2)) {
         const formats = [values.format, values.json ? 'json' : undefined, values.plain ? 'plain' : undefined, values.table ? 'table' : undefined].filter(Boolean);
         if (formats.length > 1 || formats.some(value => !['plain', 'table', 'json'].includes(value)))
             throw new Error('Choose one output format: plain, table, or json.');
+        const explicit = formats.length > 0;
         format = formats[0] ?? format;
         const providers = await loadProviders(values.plugin);
         const providerIds = values.provider?.flatMap(value => value.split(',')).map(value => value.trim());
@@ -66,7 +67,11 @@ export async function run(args = process.argv.slice(2)) {
         const report = await service.collect({ providerIds, fresh: values.fresh });
         if (!values.all && !providerIds?.length)
             report.providers = report.providers.filter(provider => provider.installed || provider.credentialsPresent || provider.reason?.code !== 'missing_credentials');
-        process.stdout.write(render(report, format, { columns: process.stdout.columns, utc: values.utc }));
+        const options = { columns: process.stdout.columns, utc: values.utc };
+        // A table that must wrap in a narrow terminal is harder to read than plain text.
+        if (format === 'table' && !explicit && tableWraps(report, options))
+            format = 'plain';
+        process.stdout.write(render(report, format, options));
         return report.providers.some(provider => provider.availability === 'available') ? 0 : 1;
     }
     catch (error) {

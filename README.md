@@ -52,7 +52,7 @@ Without `--utc`, the table and the plain text show reset, fetch, and expiry time
 
 ### Pretty table
 
-Use `--table` for this view. It is also the default in an interactive terminal.
+Use `--table` for this view. It is also the default in an interactive terminal that is wide enough. When a cell would wrap, the default falls back to plain text. Pass `--table` to force the table.
 
 ```text
 ASU · 2026-09-07T12:18:06.253Z
@@ -306,7 +306,7 @@ When you run ASU through `npx`, put the ASU options after the package URL.
 
 | Option | Behavior |
 | --- | --- |
-| `--format plain\|table\|json` | Select one output format |
+| `--format plain\|table\|json` | Select one output format. Without it, a terminal gets the table, or plain text when the table would wrap. A pipe gets plain text. |
 | `--plain`, `--table`, `--json` | Shortcuts for `--format`. Use only one. |
 | `--utc` | Print full UTC timestamps in table and plain output instead of times relative to now, such as `2h30m` or `7d (Tue 15 Sep)` |
 | `--provider claude,codex` | Select provider IDs. Repeat the flag or separate the IDs with commas. |
