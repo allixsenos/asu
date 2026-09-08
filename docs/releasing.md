@@ -13,7 +13,7 @@
 ## Version rules
 
 - Conventional Commit types decide the bump: `feat` is minor, `fix` and `perf` are patch, a `!` or a `BREAKING CHANGE:` footer is major.
-- Before 1.0.0, a breaking change bumps the minor version and a feature bumps the patch version. This is the `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` configuration.
+- Before 1.0.0, a breaking change bumps the minor version instead of the major version. This is the `bump-minor-pre-major` configuration. A feature still bumps the minor version.
 - To force a version, add `Release-As: <version>` as a footer on a commit to `main`.
 - A change to the JSON report that removes or renames a field must bump `schemaVersion` in `src/models.ts`. Additive fields do not.
 
