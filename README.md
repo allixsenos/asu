@@ -48,7 +48,7 @@ node dist/cli.js --provider claude,codex,copilot --fresh --no-cache --json
 
 ASU's own renderers made the table and the plain text below from that same JSON snapshot with `--utc`, so all three examples show identical data. The examples include no credentials and no account identifiers. All reset times are UTC.
 
-Without `--utc`, the table and the plain text show reset, fetch, and expiry times relative to now, for example `2h30m`, `45m`, or `3d6h`. A reset time that already passed shows as `now`. JSON always contains the full UTC timestamps.
+Without `--utc`, the table and the plain text show reset, fetch, and expiry times relative to now, for example `2h30m` or `45m`. A time a day or more away also names the local calendar day, for example `7d (Tue 15 Sep)`. A reset time that already passed shows as `now`. JSON always contains the full UTC timestamps.
 
 ### Pretty table
 
@@ -308,7 +308,7 @@ When you run ASU through `npx`, put the ASU options after the package URL.
 | --- | --- |
 | `--format plain\|table\|json` | Select one output format |
 | `--plain`, `--table`, `--json` | Shortcuts for `--format`. Use only one. |
-| `--utc` | Print full UTC timestamps in table and plain output instead of times relative to now, such as `2h30m` |
+| `--utc` | Print full UTC timestamps in table and plain output instead of times relative to now, such as `2h30m` or `7d (Tue 15 Sep)` |
 | `--provider claude,codex` | Select provider IDs. Repeat the flag or separate the IDs with commas. |
 | `--all` | Include providers with no detected installation or credentials |
 | `--fresh` | Bypass cached usage. Concurrent fresh requests still share one fetch. |
