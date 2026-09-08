@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { renderPlain, renderTable, render } from '../dist/output.js';
+import { renderPlain, renderTable, render, tableWraps } from '../dist/output.js';
 import { reportSchema } from '../dist/models.js';
 
 const exec = promisify(execFile);
@@ -19,7 +19,8 @@ const report = { schemaVersion: 1, generatedAt: '2026-09-07T12:00:00.000Z', warn
     { id: 'monthly', label: 'Monthly', percentUsed: 50, resetsAt: '2026-09-14T12:00:00.000Z' },
     { id: 'unlimited', label: 'Chat', percentUsed: null, resetsAt: null, unlimited: true }],
   balances: [{ id: 'credits', label: 'Credits', remaining: 4.5, unit: 'credits' }],
-  details: [{ label: 'Extra usage', value: 'Disabled' }],
+  details: [{ label: 'Extra usage', value: 'Disabled' }, { label: 'Quota reset', value: '2026-09-14T12:00:00.000Z' },
+    { label: 'Since', value: '2026-09-07T12:00:00.000Z' }],
 }] };
 
 test('plain, table and JSON present zero, unknown and unlimited without inventing quantities', () => {
@@ -28,6 +29,7 @@ test('plain, table and JSON present zero, unknown and unlimited without inventin
   assert.ok(plain.includes('Weekly: 0% used; resets unknown'));
   assert.ok(plain.includes('Chat: Unlimited'));
   assert.ok(plain.includes('4.5 credits left'));
+  assert.ok(plain.includes('Quota reset: 2026-09-14T12:00:00.000Z'));
   assert.ok(!plain.includes('\x1b'));
   const table = renderTable(report, { utc: true });
   assert.ok(table.includes('┌'));
@@ -45,7 +47,12 @@ test('plain and table show times relative to now unless --utc is passed', () => 
   // A reset a day or more away also names the calendar day. Noon UTC keeps the day stable across time zones.
   assert.ok(plain.includes('Monthly: 50% used; resets in 6d22h (Mon 14 Sep)'));
   assert.ok(plain.includes('Fetched 1h30m ago; fresh; expires now'));
+  // Detail values that are ISO timestamps read like other times. Other values print as is.
+  assert.ok(plain.includes('Quota reset: in 6d22h (Mon 14 Sep)'));
+  assert.ok(plain.includes('Since: 1h30m ago'));
+  assert.ok(plain.includes('Extra usage: Disabled'));
   const table = renderTable(report, { now });
+  assert.ok(table.includes('  Quota reset: in 6d22h (Mon 14 Sep)'));
   assert.ok(table.includes('Resets in'));
   assert.ok(table.includes('│ 2h30m'));
   assert.ok(table.includes('│ 6d22h (Mon 14 Sep)'));
@@ -62,6 +69,9 @@ test('table wraps rather than dropping values in narrow terminals', () => {
   const grid = table.split('\n').filter(line => /^[┌│├└]/.test(line));
   assert.ok(grid.every(line => [...line].length <= 60));
   assert.ok(table.includes('Weekly'));
+  // The CLI falls back to plain output when a cell would wrap, unless --table was requested.
+  assert.equal(tableWraps(report, { columns: 60 }), true);
+  assert.equal(tableWraps(report, { columns: 120 }), false);
 });
 test('CLI emits standalone JSON through an explicitly loaded provider plugin', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'asu-cli-'));

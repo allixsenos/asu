@@ -8,4 +8,6 @@ export interface RenderOptions {
 }
 export declare function renderPlain(report: UsageReport, options?: RenderOptions): string;
 export declare function renderTable(report: UsageReport, options?: RenderOptions): string;
+/** True when a cell would wrap at this width. The CLI then prefers plain output unless the table was requested. */
+export declare function tableWraps(report: UsageReport, options?: RenderOptions): boolean;
 export declare function render(report: UsageReport, format: OutputFormat, options?: RenderOptions): string;
