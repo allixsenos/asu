@@ -1,6 +1,6 @@
 {
   "name": "@allixsenos/asu",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Agent subscription usage for humans and agents",
   "type": "module",
   "bin": {
