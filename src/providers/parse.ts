@@ -35,7 +35,8 @@ export function timestamp(value: unknown): string | null {
   const ms = numeric === undefined ? (typeof value === 'string' ? Date.parse(value) : NaN)
     : numeric < 100_000_000_000 ? numeric * 1000 : numeric;
   if (!Number.isFinite(ms)) throw new UsageError('invalid_response');
-  try { return new Date(ms).toISOString(); } catch { throw new UsageError('invalid_response'); }
+  // Providers compute reset times relative to the request, so the milliseconds jitter between calls. Whole seconds are stable enough.
+  try { return new Date(Math.round(ms / 1000) * 1000).toISOString(); } catch { throw new UsageError('invalid_response'); }
 }
 export function slug(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 100) || 'scope';
