@@ -21,6 +21,7 @@
 
 - `release-please-config.json` holds the release type and the bump rules. `initial-version` sets the first release to 0.1.0, because release-please defaults to 1.0.0 when no release exists.
 - The repository setting "Allow GitHub Actions to create and approve pull requests" must stay on. Without it, release-please cannot open the release PR.
+- `dist/` is committed and reads the version from `package.json` at run time, so a release PR needs no rebuild.
 - `.release-please-manifest.json` holds the last released version. release-please updates it in each release PR. Do not edit it by hand after the first release.
 - The workflow uses the `RELEASE_PLEASE_TOKEN` secret when it exists, and the default `GITHUB_TOKEN` otherwise. Pull requests that the default token opens do not trigger CI, so the release PR shows no checks. A fine-grained PAT with contents and pull requests write access solves that.
 - Tags that release-please creates are not signed with a personal key. GitHub creates them through the API.

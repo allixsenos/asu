@@ -22,6 +22,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
+      - name: Make sure the committed dist matches a fresh build
+        run: git diff --exit-code --stat -- dist && test -z "$(git status --porcelain -- dist)"
       - run: node scripts/check-commit.mjs
         env:
           ASU_PR_TITLE: ${{ github.event.pull_request.title }}

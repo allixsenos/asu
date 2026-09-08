@@ -1,0 +1,16 @@
+import type { UsageData, UsageWindow } from '../models.js';
+export type Obj = Record<string, unknown>;
+export declare function object(value: unknown): Obj;
+export declare function optionalObject(value: unknown): Obj;
+export declare function list(value: unknown): unknown[];
+export declare function string(value: unknown): string | undefined;
+export declare function number(value: unknown): number | undefined;
+export declare function nonnegative(value: unknown): number | undefined;
+export declare function percent(value: unknown): number;
+export declare function timestamp(value: unknown): string | null;
+export declare function slug(value: string): string;
+export declare function title(value: string): string;
+export declare function ratio(used: unknown, limit: unknown): number | null;
+export declare function countWindow(id: string, label: string, raw: Obj, reset: unknown, unit?: string): UsageWindow;
+export declare function requireUsage(data: UsageData): UsageData;
+export declare function credentialObject(value: unknown): Obj;
