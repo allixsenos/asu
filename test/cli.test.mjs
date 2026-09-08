@@ -68,6 +68,24 @@ test('plain and table show times relative to now unless --utc is passed', () => 
   assert.match(late, /resets in 3d6h \((Mon 7|Tue 8) Sep\)/);
   assert.ok(!JSON.parse(render(report, 'json', { now })).providers[0].windows[0].resetsAt.includes('in '));
 });
+test('one status word per provider: usage wins, then credentials, then the install check', () => {
+  const base = report.providers[0];
+  const missing = { code: 'missing_credentials', message: 'No supported local credentials found. Sign in using the provider CLI.' };
+  const cases = [
+    [{ }, 'active'],
+    [{ availability: 'available', installed: false }, 'active'],
+    [{ availability: 'unavailable', authenticated: false, credentialsPresent: true, reason: { code: 'unauthorized', message: 'x' } }, 'not logged in'],
+    [{ availability: 'unavailable', authenticated: false, credentialsPresent: false, installed: false, reason: missing }, 'not installed'],
+    [{ availability: 'unavailable', authenticated: false, credentialsPresent: false, installed: null, reason: missing }, 'not logged in'],
+    [{ availability: 'error', authenticated: null, reason: { code: 'timeout', message: 'x' } }, 'error'],
+  ];
+  for (const [patch, expected] of cases) {
+    const one = { ...report, providers: [{ ...base, ...patch }] };
+    assert.ok(renderPlain(one).includes(`\n  ${expected}\n`), `plain ${expected}`);
+    assert.ok(renderTable(one).includes(`│ ${expected}`), `table ${expected}`);
+    assert.ok(!renderPlain(one).includes('authenticated:'));
+  }
+});
 test('table wraps rather than dropping values in narrow terminals', () => {
   const table = renderTable(report, { columns: 60 });
   const grid = table.split('\n').filter(line => /^[┌│├└]/.test(line));

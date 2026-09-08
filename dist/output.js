@@ -38,7 +38,6 @@ function detailValue(value, options) {
     return Date.parse(value) > (options.now ?? Date.now()) ? ahead(value, options) : ago(value, options);
 }
 const amount = (value) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
-const yesNo = (value) => value === null ? 'unknown' : value ? 'yes' : 'no';
 function windowValue(window) {
     if (window.unlimited)
         return 'Unlimited';
@@ -61,13 +60,20 @@ function balanceValue(balance) {
         parts.push(`limit ${amount(balance.limit)} ${balance.unit}`);
     return parts.join('; ') || 'Balance unknown';
 }
-function providerSummary(provider) {
-    return `installed: ${yesNo(provider.installed)}, authenticated: ${yesNo(provider.authenticated)}`;
+/** One word per provider. Usage that came back wins, whatever the install check said. */
+function status(provider) {
+    if (provider.availability === 'available')
+        return 'active';
+    if (provider.availability === 'error')
+        return 'error';
+    if (provider.credentialsPresent)
+        return 'not logged in';
+    return provider.installed === false ? 'not installed' : 'not logged in';
 }
 export function renderPlain(report, options = {}) {
     const lines = [`ASU · ${report.generatedAt}`];
     for (const provider of report.providers) {
-        lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`, `  ${provider.availability}; ${providerSummary(provider)}`);
+        lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`, `  ${status(provider)}`);
         if (provider.planLabel)
             lines.push(`  Plan: ${provider.planLabel}`);
         for (const window of provider.windows)
@@ -158,7 +164,7 @@ function buildTable(report, options) {
         if (!rows.length)
             rows.push(['—', '—', '—']);
         rows.forEach((cells, index) => row([index ? '' : provider.displayName + (provider.experimental ? ' *' : ''),
-            index ? '' : [provider.planLabel, provider.availability, provider.cached ? 'cached' : 'fresh'].filter(Boolean).join('\n'), ...cells]));
+            index ? '' : [provider.planLabel, status(provider), provider.cached ? 'cached' : 'fresh'].filter(Boolean).join('\n'), ...cells]));
     }
     lines.push(border('└', '┴', '┘'));
     if (!report.providers.length)

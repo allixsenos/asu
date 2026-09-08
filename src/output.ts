@@ -40,7 +40,6 @@ function detailValue(value: string, options: RenderOptions): string {
   return Date.parse(value) > (options.now ?? Date.now()) ? ahead(value, options) : ago(value, options);
 }
 const amount = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
-const yesNo = (value: boolean | null) => value === null ? 'unknown' : value ? 'yes' : 'no';
 function windowValue(window: UsageWindow): string {
   if (window.unlimited) return 'Unlimited';
   const parts = [window.percentUsed === null ? 'Usage unknown' : `${amount(window.percentUsed)}% used`];
@@ -56,14 +55,18 @@ function balanceValue(balance: Balance): string {
   if (balance.limit !== undefined) parts.push(`limit ${amount(balance.limit)} ${balance.unit}`);
   return parts.join('; ') || 'Balance unknown';
 }
-function providerSummary(provider: ProviderUsage): string {
-  return `installed: ${yesNo(provider.installed)}, authenticated: ${yesNo(provider.authenticated)}`;
+/** One word per provider. Usage that came back wins, whatever the install check said. */
+function status(provider: ProviderUsage): string {
+  if (provider.availability === 'available') return 'active';
+  if (provider.availability === 'error') return 'error';
+  if (provider.credentialsPresent) return 'not logged in';
+  return provider.installed === false ? 'not installed' : 'not logged in';
 }
 export function renderPlain(report: UsageReport, options: RenderOptions = {}): string {
   const lines = [`ASU · ${report.generatedAt}`];
   for (const provider of report.providers) {
     lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`,
-      `  ${provider.availability}; ${providerSummary(provider)}`);
+      `  ${status(provider)}`);
     if (provider.planLabel) lines.push(`  Plan: ${provider.planLabel}`);
     for (const window of provider.windows) lines.push(`  ${window.label}: ${windowValue(window)}; resets ${ahead(window.resetsAt, options)}`);
     for (const balance of provider.balances) lines.push(`  ${balance.label}: ${balanceValue(balance)}`);
@@ -137,7 +140,7 @@ function buildTable(report: UsageReport, options: RenderOptions): { text: string
     if (provider.reason) rows.push(['Reason', provider.reason.code, '—']);
     if (!rows.length) rows.push(['—', '—', '—']);
     rows.forEach((cells, index) => row([index ? '' : provider.displayName + (provider.experimental ? ' *' : ''),
-      index ? '' : [provider.planLabel, provider.availability, provider.cached ? 'cached' : 'fresh'].filter(Boolean).join('\n'), ...cells]));
+      index ? '' : [provider.planLabel, status(provider), provider.cached ? 'cached' : 'fresh'].filter(Boolean).join('\n'), ...cells]));
   }
   lines.push(border('└', '┴', '┘'));
   if (!report.providers.length) lines.push('No supported agents or credentials detected. Use --all to list every provider.');
