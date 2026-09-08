@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/allixsenos/asu/compare/v0.3.0...v0.4.0) (2026-09-08)
+
+
+### Features
+
+* **cli:** accept provider names as bare words ([#19](https://github.com/allixsenos/asu/issues/19)) ([2889a28](https://github.com/allixsenos/asu/commit/2889a28c283ff21e1beb1a58a608e28ecaedf7c9))
+
 ## [0.3.0](https://github.com/allixsenos/asu/compare/v0.2.1...v0.3.0) (2026-09-08)
 
 
