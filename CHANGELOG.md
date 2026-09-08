@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/allixsenos/asu/compare/v0.1.0...v0.2.0) (2026-09-08)
+
+
+### Features
+
+* **cli:** name the calendar day for resets a day or more away ([#10](https://github.com/allixsenos/asu/issues/10)) ([3c9a247](https://github.com/allixsenos/asu/commit/3c9a2475ae32ca141249ac2185bc77a1bcba832d))
+* **cli:** show relative times in table and plain output ([#7](https://github.com/allixsenos/asu/issues/7)) ([b3435a7](https://github.com/allixsenos/asu/commit/b3435a704b8cd1cf4005f180883d57584f4b102d))
+
 ## 0.1.0 (2026-09-07)
 
 
