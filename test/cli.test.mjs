@@ -10,7 +10,7 @@ import { reportSchema } from '../dist/models.js';
 
 const exec = promisify(execFile);
 const cli = resolve('dist/cli.js');
-const report = { schemaVersion: 1, generatedAt: '2026-09-07T12:00:00.000Z', warnings: [], providers: [{
+const report = { schemaVersion: 1, asuVersion: '0.0.0-test', generatedAt: '2026-09-07T12:00:00.000Z', warnings: [], providers: [{
   providerId: 'example', displayName: 'Example', planLabel: 'Pro', installed: true, credentialsPresent: true,
   authenticated: true, availability: 'available', experimental: false, reason: null, cached: false,
   fetchedAt: '2026-09-07T12:00:00.000Z', expiresAt: '2026-09-07T12:05:00.000Z',
@@ -30,6 +30,7 @@ test('plain, table and JSON present zero, unknown and unlimited without inventin
   assert.ok(plain.includes('Chat: Unlimited'));
   assert.ok(plain.includes('4.5 credits left'));
   assert.ok(plain.includes('Quota reset: 2026-09-14T12:00:00.000Z'));
+  assert.ok(plain.startsWith('ASU 0.0.0-test · 2026-09-07T12:00:00.000Z\n'));
   assert.ok(!plain.includes('\x1b'));
   const table = renderTable(report, { utc: true });
   assert.ok(table.includes('┌'));

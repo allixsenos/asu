@@ -3,6 +3,7 @@ import { UsageError, safeReason } from './errors.js';
 import { emptyUsage, providerUsageSchema, usageDataSchema } from './models.js';
 import { createLocalContext } from './local.js';
 import { createTransport } from './transport.js';
+import { version } from './version.js';
 export async function deadline(work, timeoutMs) {
     const controller = new AbortController();
     let timer;
@@ -54,7 +55,7 @@ export class UsageService {
     async collect(options = {}) {
         const selected = options.providerIds?.length ? this.providers.filter(p => options.providerIds.includes(p.id)) : this.providers;
         const providers = await Promise.all(selected.map(provider => this.collectProvider(provider, options.fresh ?? false)));
-        return { schemaVersion: 1, generatedAt: new Date(this.now()).toISOString(), warnings: [...this.cache.warnings], providers };
+        return { schemaVersion: 1, asuVersion: version, generatedAt: new Date(this.now()).toISOString(), warnings: [...this.cache.warnings], providers };
     }
     result(provider, installed, credentialsPresent, error) {
         const reason = error ? safeReason(error) : null;

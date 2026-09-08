@@ -11,15 +11,15 @@ npx --yes @allixsenos/asu --table
 ```
 
 ```text
-ASU · 2026-09-08T12:54:06.628Z
+ASU 0.6.0 · 2026-09-08T13:41:25.567Z
 ┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
 │ Provider         │ Plan / status      │ Window / balance      │ Usage                 │ Resets in          │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Claude           │ Max 20x            │ 5 hours               │ 35% used              │ 1h36m              │
+│ Claude           │ Max 20x            │ 5 hours               │ 45% used              │ 49m                │
 │                  │ active             │                       │                       │                    │
 │                  │ fresh              │                       │                       │                    │
-│                  │                    │ Weekly                │ 11% used              │ 6d16h (Tue 15 Sep) │
-│                  │                    │ Weekly · Fable        │ 11% used              │ 6d16h (Tue 15 Sep) │
+│                  │                    │ Weekly                │ 12% used              │ 6d15h (Tue 15 Sep) │
+│                  │                    │ Weekly · Fable        │ 11% used              │ 6d15h (Tue 15 Sep) │
 │                  │                    │ Extra usage           │ Disabled              │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
 │ Codex            │ Plus               │ 5 hours               │ 0% used               │ 5h                 │
@@ -30,12 +30,12 @@ ASU · 2026-09-08T12:54:06.628Z
 │                  │                    │ Credits               │ 0 credits left        │ —                  │
 │                  │                    │ Credits available     │ No                    │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 22d11h (Thu 1 Oct) │
+│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 22d10h (Thu 1 Oct) │
 │                  │ active             │                       │ 0 / 200 requests      │                    │
 │                  │ fresh              │                       │                       │                    │
-│                  │                    │ Completions           │ 0% used               │ 22d11h (Thu 1 Oct) │
+│                  │                    │ Completions           │ 0% used               │ 22d10h (Thu 1 Oct) │
 │                  │                    │                       │ 0 / 2,000 requests    │                    │
-│                  │                    │ Premium Interactions  │ 100% used             │ 22d11h (Thu 1 Oct) │
+│                  │                    │ Premium Interactions  │ 100% used             │ 22d10h (Thu 1 Oct) │
 │                  │                    │                       │ 0 / 0 requests        │                    │
 └──────────────────┴────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
 Claude: fetched <1m ago; cache expires in 5m.
@@ -84,7 +84,7 @@ This needs Git. The repository commits the built `dist/` directory, so the insta
 
 ## Real account output
 
-We fetched the snapshot below on **2026-09-08 at 12:54 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
+We fetched the snapshot below on **2026-09-08 at 13:41 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
 
 The capture used the local checkout:
 
@@ -101,22 +101,22 @@ Without `--utc`, the table and the plain text show reset, fetch, and expiry time
 Use `--table` for this view. It is also the default in an interactive terminal that is wide enough. When a cell would wrap, the default falls back to plain text. Pass `--table` to force the table.
 
 ```text
-ASU · 2026-09-08T12:54:06.628Z
+ASU 0.6.0 · 2026-09-08T13:41:25.567Z
 ┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
 │ Provider         │ Plan / status      │ Window / balance      │ Usage                 │ Resets (UTC)       │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Claude           │ Max 20x            │ 5 hours               │ 35% used              │ 2026-09-08 14:30   │
+│ Claude           │ Max 20x            │ 5 hours               │ 45% used              │ 2026-09-08 14:30   │
 │                  │ active             │                       │                       │                    │
 │                  │ fresh              │                       │                       │                    │
-│                  │                    │ Weekly                │ 11% used              │ 2026-09-15 05:00   │
+│                  │                    │ Weekly                │ 12% used              │ 2026-09-15 05:00   │
 │                  │                    │ Weekly · Fable        │ 11% used              │ 2026-09-15 05:00   │
 │                  │                    │ Extra usage           │ Disabled              │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Codex            │ Plus               │ 5 hours               │ 0% used               │ 2026-09-08 17:54   │
+│ Codex            │ Plus               │ 5 hours               │ 0% used               │ 2026-09-08 18:41   │
 │                  │ active             │                       │                       │                    │
 │                  │ fresh              │                       │                       │                    │
-│                  │                    │ Weekly                │ 0% used               │ 2026-09-15 12:54   │
-│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 2026-09-15 12:54   │
+│                  │                    │ Weekly                │ 0% used               │ 2026-09-15 13:41   │
+│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 2026-09-15 13:41   │
 │                  │                    │ Credits               │ 0 credits left        │ —                  │
 │                  │                    │ Credits available     │ No                    │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
@@ -128,9 +128,9 @@ ASU · 2026-09-08T12:54:06.628Z
 │                  │                    │ Premium Interactions  │ 100% used             │ 2026-10-01 00:00   │
 │                  │                    │                       │ 0 / 0 requests        │                    │
 └──────────────────┴────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
-Claude: fetched 2026-09-08T12:54:06.286Z; cache expires 2026-09-08T12:59:06.286Z.
-Codex: fetched 2026-09-08T12:54:06.628Z; cache expires 2026-09-08T12:59:06.628Z.
-GitHub Copilot: fetched 2026-09-08T12:54:06.283Z; cache expires 2026-09-08T12:59:06.283Z.
+Claude: fetched 2026-09-08T13:41:24.073Z; cache expires 2026-09-08T13:46:24.073Z.
+Codex: fetched 2026-09-08T13:41:25.567Z; cache expires 2026-09-08T13:46:25.567Z.
+GitHub Copilot: fetched 2026-09-08T13:41:24.314Z; cache expires 2026-09-08T13:46:24.314Z.
 ```
 
 Read Copilot's premium row with care. The endpoint returned zero entitlement, zero remaining requests, and zero percent remaining. ASU therefore shows `100% used` next to `0 / 0 requests`. This does **not** show that anyone consumed a premium request. The internal endpoint can return legacy quota information. Treat its quantities as the provider's reported snapshot, not as a complete billing statement.
@@ -143,26 +143,26 @@ Use `--plain` for readable output in logs and pipes. It is the default when stdo
 <summary>Show the complete plain-text output</summary>
 
 ```text
-ASU · 2026-09-08T12:54:06.628Z
+ASU 0.6.0 · 2026-09-08T13:41:25.567Z
 
 Claude (claude)
   active
   Plan: Max 20x
-  5 hours: 35% used; resets 2026-09-08T14:30:00.000Z
-  Weekly: 11% used; resets 2026-09-15T05:00:00.000Z
+  5 hours: 45% used; resets 2026-09-08T14:30:00.000Z
+  Weekly: 12% used; resets 2026-09-15T05:00:00.000Z
   Weekly · Fable: 11% used; resets 2026-09-15T05:00:00.000Z
   Extra usage: Disabled
-  Fetched 2026-09-08T12:54:06.286Z; fresh; expires 2026-09-08T12:59:06.286Z
+  Fetched 2026-09-08T13:41:24.073Z; fresh; expires 2026-09-08T13:46:24.073Z
 
 Codex (codex)
   active
   Plan: Plus
-  5 hours: 0% used; resets 2026-09-08T17:54:06.000Z
-  Weekly: 0% used; resets 2026-09-15T12:54:06.000Z
-  Gpt Reserve · Weekly: 0% used; resets 2026-09-15T12:54:06.000Z
+  5 hours: 0% used; resets 2026-09-08T18:41:25.000Z
+  Weekly: 0% used; resets 2026-09-15T13:41:25.000Z
+  Gpt Reserve · Weekly: 0% used; resets 2026-09-15T13:41:25.000Z
   Credits: 0 credits left
   Credits available: No
-  Fetched 2026-09-08T12:54:06.628Z; fresh; expires 2026-09-08T12:59:06.628Z
+  Fetched 2026-09-08T13:41:25.567Z; fresh; expires 2026-09-08T13:46:25.567Z
 
 GitHub Copilot (copilot)
   active
@@ -170,7 +170,7 @@ GitHub Copilot (copilot)
   Chat: 0% used; 0 / 200 requests; resets 2026-10-01T00:00:00.000Z
   Completions: 0% used; 0 / 2,000 requests; resets 2026-10-01T00:00:00.000Z
   Premium Interactions: 100% used; 0 / 0 requests; resets 2026-10-01T00:00:00.000Z
-  Fetched 2026-09-08T12:54:06.283Z; fresh; expires 2026-09-08T12:59:06.283Z
+  Fetched 2026-09-08T13:41:24.314Z; fresh; expires 2026-09-08T13:46:24.314Z
 ```
 
 </details>
@@ -185,7 +185,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
 ```json
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T12:54:06.628Z",
+  "asuVersion": "0.6.0",
+  "generatedAt": "2026-09-08T13:41:25.567Z",
   "warnings": [],
   "providers": [
     {
@@ -194,13 +195,13 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
         {
           "id": "five_hour",
           "label": "5 hours",
-          "percentUsed": 35,
+          "percentUsed": 45,
           "resetsAt": "2026-09-08T14:30:00.000Z"
         },
         {
           "id": "seven_day",
           "label": "Weekly",
-          "percentUsed": 11,
+          "percentUsed": 12,
           "resetsAt": "2026-09-15T05:00:00.000Z"
         },
         {
@@ -228,8 +229,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-08T12:54:06.286Z",
-      "expiresAt": "2026-09-08T12:59:06.286Z",
+      "fetchedAt": "2026-09-08T13:41:24.073Z",
+      "expiresAt": "2026-09-08T13:46:24.073Z",
       "cached": false
     },
     {
@@ -239,19 +240,19 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
           "id": "usage-primary_window",
           "label": "5 hours",
           "percentUsed": 0,
-          "resetsAt": "2026-09-08T17:54:06.000Z"
+          "resetsAt": "2026-09-08T18:41:25.000Z"
         },
         {
           "id": "usage-secondary_window",
           "label": "Weekly",
           "percentUsed": 0,
-          "resetsAt": "2026-09-15T12:54:06.000Z"
+          "resetsAt": "2026-09-15T13:41:25.000Z"
         },
         {
           "id": "additional-0-gpt-reserve-primary_window",
           "label": "Gpt Reserve · Weekly",
           "percentUsed": 0,
-          "resetsAt": "2026-09-15T12:54:06.000Z"
+          "resetsAt": "2026-09-15T13:41:25.000Z"
         }
       ],
       "balances": [
@@ -277,8 +278,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-08T12:54:06.628Z",
-      "expiresAt": "2026-09-08T12:59:06.628Z",
+      "fetchedAt": "2026-09-08T13:41:25.567Z",
+      "expiresAt": "2026-09-08T13:46:25.567Z",
       "cached": false
     },
     {
@@ -325,8 +326,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-08T12:54:06.283Z",
-      "expiresAt": "2026-09-08T12:59:06.283Z",
+      "fetchedAt": "2026-09-08T13:41:24.314Z",
+      "expiresAt": "2026-09-08T13:46:24.314Z",
       "cached": false
     }
   ]
@@ -387,6 +388,7 @@ A consumer must examine `schemaVersion` before it processes a report. Version 1 
 
 | Field | Meaning |
 | --- | --- |
+| `asuVersion` | The ASU package version that wrote the report. The plain and table headers show it too. |
 | `generatedAt`, `warnings`, `providers` | Report timestamp, shared warnings, and independent provider results |
 | `providerId`, `displayName`, `experimental` | Provider identity and live-validation status |
 | `installed`, `credentialsPresent`, `authenticated` | Separate discovery and authentication observations |

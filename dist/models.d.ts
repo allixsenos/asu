@@ -114,6 +114,7 @@ export declare const providerUsageSchema: z.ZodObject<{
 }, z.core.$strip>;
 export declare const reportSchema: z.ZodObject<{
     schemaVersion: z.ZodLiteral<1>;
+    asuVersion: z.ZodString;
     generatedAt: z.ZodISODateTime;
     warnings: z.ZodArray<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
     providers: z.ZodArray<z.ZodObject<{
