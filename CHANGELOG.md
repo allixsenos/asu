@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/allixsenos/asu/compare/v0.2.1...v0.3.0) (2026-09-08)
+
+
+### Features
+
+* **cli:** humanize timestamp details and fall back to plain output in narrow terminals ([#13](https://github.com/allixsenos/asu/issues/13)) ([e10f6c1](https://github.com/allixsenos/asu/commit/e10f6c1a73c3038cf157f907bd36d1a7c4e7be50))
+* **cli:** show details as table rows and keep the footer for bookkeeping ([#15](https://github.com/allixsenos/asu/issues/15)) ([d6fb9d0](https://github.com/allixsenos/asu/commit/d6fb9d0bfd04708f0c512ea7dca2b7c9fa98ae67))
+
 ## [0.2.1](https://github.com/allixsenos/asu/compare/v0.2.0...v0.2.1) (2026-09-08)
 
 
