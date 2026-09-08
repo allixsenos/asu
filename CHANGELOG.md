@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/allixsenos/asu/compare/v0.6.0...v0.7.0) (2026-09-08)
+
+
+### Features
+
+* **cli:** show the ASU version in every report header ([#27](https://github.com/allixsenos/asu/issues/27)) ([97f841f](https://github.com/allixsenos/asu/commit/97f841f4a4f05d50d76fd18cc408eecc54b7d173))
+
 ## [0.6.0](https://github.com/allixsenos/asu/compare/v0.5.0...v0.6.0) (2026-09-08)
 
 
