@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { renderPlain, renderTable, render } from '../dist/output.js';
@@ -86,7 +86,8 @@ test('CLI emits standalone JSON through an explicitly loaded provider plugin', a
   const link = join(directory, 'asu');
   await symlink(cli, link);
   const linked = await exec(process.execPath, [link, '--version']);
-  assert.equal(linked.stdout, '0.1.0\n');
+  // The version comes from package.json, which release-please bumps.
+  assert.equal(linked.stdout, `${JSON.parse(await readFile('package.json', 'utf8')).version}\n`);
 });
 test('CLI errors stay on stderr with stable exit codes', async () => {
   for (const args of [['--format', 'xml'], ['--json', '--table'], ['--provider', 'does-not-exist'], ['--unknown']]) {
