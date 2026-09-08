@@ -70,3 +70,7 @@ Do not run it more than once per five minutes.
 ```
 
 Replace `claude` with the provider you run on.
+
+## Measure one command
+
+The [asu-usage skill](../skills/asu-usage/SKILL.md) in this repository takes a snapshot before and after a command, prints the percentage points each window consumed, and appends the result to a ledger. Install it with `npx skills add allixsenos/asu`, or copy the directory into your agent's skills folder.
