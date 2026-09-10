@@ -1,6 +1,6 @@
 # ASU
 
-ASU is a TypeScript CLI that reports agent subscription usage as the provider reports it. Humans and agents use it. Support plain text, a table, and versioned JSON. Do not add a dashboard or an HTTP server.
+ASU is a TypeScript CLI that reports agent subscription usage as the provider reports it. Humans and agents use it. Support plain text, a table, a bar view, and versioned JSON. Do not add a dashboard or an HTTP server.
 
 - Providers are plugins. Each one lives in its own file under `src/providers/`.
 - Keep provider-specific credential formats and API normalization inside the adapter.

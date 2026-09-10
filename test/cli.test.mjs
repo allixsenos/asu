@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { renderPlain, renderTable, render, tableWraps } from '../dist/output.js';
+import { renderPlain, renderTable, renderBars, render, tableWraps, barsOverflow } from '../dist/output.js';
 import { reportSchema } from '../dist/models.js';
 
 const exec = promisify(execFile);
@@ -87,6 +87,33 @@ test('one status word per provider: usage wins, then credentials, then the insta
     assert.ok(!renderPlain(one).includes('authenticated:'));
   }
 });
+test('bars draw one severity-colored bar per window with a countdown and local clock', () => {
+  const now = Date.parse('2026-09-07T13:30:00.000Z');
+  const bars = renderBars(report, { now });
+  assert.ok(bars.startsWith('ASU 0.0.0-test · 2026-09-07T12:00:00.000Z\n\nExample · Pro · active · fresh\n'));
+  // 25% of 30 cells is 7.5: seven full cells, one half cell, 22 empty.
+  assert.match(bars, /  5 hours\s+━━━━━━━╸──────────────────────   25%  resets 2h 30m · \d\d:\d\d\n/);
+  assert.match(bars, /  Weekly\s+──────────────────────────────    0%\n/);
+  assert.match(bars, /  Chat\s+──────────────────────────────  unlimited\n/);
+  assert.match(bars, /  Credits\s+4\.5 credits left\n/);
+  assert.ok(bars.includes('  fetched 1h30m ago · cache expires now\n'));
+  assert.ok(!bars.includes('\x1b'));
+  const colored = renderBars(report, { now, color: true });
+  assert.ok(colored.includes('\x1b[32m━━━━━━━╸\x1b[0m'));
+  const hot = { ...report, providers: [{ ...report.providers[0], windows: [{ id: 'w', label: 'W', percentUsed: 95, resetsAt: null }] }] };
+  assert.ok(renderBars(hot, { now, color: true }).includes('\x1b[31m'));
+  // 95% of 30 cells is 28.5: 28 full, one half, one empty.
+  assert.match(renderBars(hot, { now }), /  W\s+━{28}╸─   95%\n/);
+  // Narrow widths shrink the bar to 12 cells before the clock goes, and the view only overflows below that.
+  const narrow = renderBars(report, { now, columns: 80 }).match(/  5 hours\s+([━╸─]+)   25%  resets 2h 30m · /);
+  assert.ok(narrow && narrow[1].length < 30 && narrow[1].length >= 12, 'bar shrinks before the clock goes');
+  const tight = renderBars(report, { now, columns: 50 });
+  assert.ok(tight.includes('resets 2h 30m\n') && !/resets [^\n]* · \d\d:\d\d/.test(tight), 'clock goes at 50 columns');
+  const utc = renderBars(report, { now, utc: true });
+  assert.ok(utc.includes('resets 2026-09-07T16:00:00.000Z'));
+  assert.equal(barsOverflow(report, { now, columns: 40 }), true);
+  assert.equal(barsOverflow(report, { now, columns: 60 }), false);
+});
 test('table wraps rather than dropping values in narrow terminals', () => {
   const table = renderTable(report, { columns: 60 });
   const grid = table.split('\n').filter(line => /^[┌│├└]/.test(line));
@@ -124,7 +151,7 @@ test('CLI emits standalone JSON through an explicitly loaded provider plugin', a
   assert.equal(linked.stdout, `${JSON.parse(await readFile('package.json', 'utf8')).version}\n`);
 });
 test('CLI errors stay on stderr with stable exit codes', async () => {
-  for (const args of [['--format', 'xml'], ['--json', '--table'], ['--provider', 'does-not-exist'], ['does-not-exist'], ['--unknown']]) {
+  for (const args of [['--format', 'xml'], ['--json', '--table'], ['--bars', '--plain'], ['--provider', 'does-not-exist'], ['does-not-exist'], ['--unknown']]) {
     await assert.rejects(exec(process.execPath, [cli, ...args]), error => {
       assert.equal(error.code, 2);
       assert.equal(error.stdout, '');
@@ -133,5 +160,5 @@ test('CLI errors stay on stderr with stable exit codes', async () => {
     });
   }
   const help = await exec(process.execPath, [cli, '--help']);
-  assert.ok(help.stdout.includes('plain|table|json'));
+  assert.ok(help.stdout.includes('plain|table|bars|json'));
 });

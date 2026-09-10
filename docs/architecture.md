@@ -11,7 +11,7 @@ Read-only credential lookup  Five-minute memory/disk cache + process locks
     ↓                         ↓
 Provider usage API → adapter normalization → schema validation + redaction
     ↓
-Versioned report → plain text / table / JSON
+Versioned report → plain text / table / bars / JSON
 ```
 
 The package exports a library API and the `asu` executable. It contains no frontend and no daemon. The provider ID and version identify an adapter. The credentials are part of the cache key, so two accounts never share a cached result by accident.
