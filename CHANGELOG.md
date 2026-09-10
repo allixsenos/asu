@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/allixsenos/asu/compare/v0.7.0...v0.8.0) (2026-09-10)
+
+
+### Features
+
+* **cli:** add a bars view and make it the terminal default ([#29](https://github.com/allixsenos/asu/issues/29)) ([c663770](https://github.com/allixsenos/asu/commit/c6637702c2fa4a188f61c663870ac4702fe7d89f))
+
 ## [0.7.0](https://github.com/allixsenos/asu/compare/v0.6.0...v0.7.0) (2026-09-08)
 
 
