@@ -8,7 +8,9 @@ import { createLocalContext, homePath } from './local.js';
 import { loadProviders } from './registry.js';
 import { UsageService } from './service.js';
 import { barsOverflow, render, tableWraps } from './output.js';
-import { version } from './version.js';
+import { name, version } from './version.js';
+import { checkForUpdate } from './update.js';
+import { createTransport } from './transport.js';
 export const help = `asu — agent subscription usage
 
 Usage: asu [usage] [provider...] [options]
@@ -81,6 +83,13 @@ export async function run(args = process.argv.slice(2)) {
         if (format === 'bars' && !explicit && barsOverflow(report, options))
             format = 'plain';
         process.stdout.write(render(report, format, options));
+        // Once a day, after the report, ask npm for a newer version. One line on stderr, never on stdout.
+        const env = local.env;
+        if (!values['no-cache'] && !env.ASU_NO_UPDATE_CHECK && !env.NO_UPDATE_NOTIFIER && !env.CI) {
+            const notice = await checkForUpdate({ directory, request: createTransport(fetch, 2_000, 65_536), name, version });
+            if (notice)
+                process.stderr.write(`${notice}\n`);
+        }
         return report.providers.some(provider => provider.availability === 'available') ? 0 : 1;
     }
     catch (error) {

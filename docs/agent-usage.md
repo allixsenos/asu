@@ -5,12 +5,12 @@ ASU reports how much of a coding-agent subscription you used, straight from the 
 ## The call
 
 ```bash
-npx --yes @allixsenos/asu <provider> --json
+npx --yes @allixsenos/asu@latest <provider> --json
 ```
 
 Provider names: `claude` for Claude Code, `codex` for Codex, `copilot` for GitHub Copilot, `cursor`, `zai`, `grok`, `kimi`, `minimax`. Without a name, ASU reports every provider it detects.
 
-Use `--json`. Stdout holds only the report. Diagnostics go to stderr. Exit code 0 means at least one selected provider returned usage. Exit code 1 means none did, and the report still explains why. Exit code 2 means the invocation was wrong.
+Use `--json`. Stdout holds only the report. Diagnostics go to stderr, including a once-a-day notice when a newer ASU exists, which you can ignore. The `@latest` tag matters: `npx` freezes a bare package name at the first version it cached. Exit code 0 means at least one selected provider returned usage. Exit code 1 means none did, and the report still explains why. Exit code 2 means the invocation was wrong.
 
 ASU only reads credentials that the provider's own CLI already stored. It never signs in, refreshes a token, or writes to a provider file.
 
@@ -32,14 +32,14 @@ For each entry in `providers`:
 Highest usage across all windows of one provider:
 
 ```bash
-npx --yes @allixsenos/asu claude --json \
+npx --yes @allixsenos/asu@latest claude --json \
   | jq '[.providers[0].windows[].percentUsed | select(. != null)] | max'
 ```
 
 Minutes until the most constrained window resets:
 
 ```bash
-npx --yes @allixsenos/asu claude --json \
+npx --yes @allixsenos/asu@latest claude --json \
   | jq -r '.providers[0].windows | max_by(.percentUsed // 0) | .resetsAt' \
   | xargs -I{} node -e 'console.log(Math.round((Date.parse("{}") - Date.now()) / 60000))'
 ```
@@ -47,7 +47,7 @@ npx --yes @allixsenos/asu claude --json \
 Every available provider with a window at or above 80 percent:
 
 ```bash
-npx --yes @allixsenos/asu --json | jq '[.providers[]
+npx --yes @allixsenos/asu@latest --json | jq '[.providers[]
   | select(.availability == "available")
   | select(any(.windows[]; .percentUsed != null and .percentUsed >= 80))
   | .providerId]'
@@ -63,7 +63,7 @@ npx --yes @allixsenos/asu --json | jq '[.providers[]
 ## Paste into your project's agent instructions
 
 ```markdown
-Before a long task, run `npx --yes @allixsenos/asu claude --json` and read the highest
+Before a long task, run `npx --yes @allixsenos/asu@latest claude --json` and read the highest
 `percentUsed` in `providers[0].windows`. Continue below 70. Between 70 and 90 use smaller
 steps. At 90 or above, stop, and tell the user the figure and the `resetsAt` time.
 Do not run it more than once per five minutes.

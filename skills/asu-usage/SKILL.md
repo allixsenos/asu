@@ -28,7 +28,7 @@ Or copy this directory to `~/.claude/skills/asu-usage/`.
 No install is needed. `npx` fetches the newest release from npm on first use and caches it:
 
 ```bash
-npx --yes @allixsenos/asu claude --json --fresh
+npx --yes @allixsenos/asu@latest claude --json --fresh
 ```
 
 For a permanent `asu` command, when the npm global prefix is writable:
@@ -42,7 +42,7 @@ An `EACCES` error from that install means the prefix belongs to root, as with a 
 
 If npm is unreachable, the Git form runs the current `main` branch and needs Git: `npx --yes github:allixsenos/asu claude --json`. `measure.py` uses the `npx` form, so it works with no install at all.
 
-Check the setup with `npx --yes @allixsenos/asu --version` and then `npx --yes @allixsenos/asu claude`. Exit code 0 means usage came back. Exit code 1 with a reason line means the provider is not signed in or not installed.
+Check the setup with `npx --yes @allixsenos/asu@latest --version` and then `npx --yes @allixsenos/asu@latest claude`. Exit code 0 means usage came back. Exit code 1 with a reason line means the provider is not signed in or not installed.
 
 Provider names: `claude`, `codex`, `copilot`, `cursor`, `zai`, `grok`, `kimi`, `minimax`. Useful flags: `--json`, `--table`, `--plain`, `--fresh` (bypass cache), `--utc`, `--all`.
 

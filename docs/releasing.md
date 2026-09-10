@@ -43,7 +43,7 @@ After that, every release publishes on its own.
 ## Install a released version
 
 ```bash
-npx --yes @allixsenos/asu --table
+npx --yes @allixsenos/asu@latest --table
 ```
 
 No token is needed. The package is public on the npm registry.
