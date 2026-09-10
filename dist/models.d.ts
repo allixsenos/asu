@@ -53,7 +53,7 @@ export declare const usageDataSchema: z.ZodObject<{
         value: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
-export declare const reasonCodes: readonly ["missing_credentials", "invalid_credentials", "credential_read_error", "unauthorized", "timeout", "rate_limited", "http_error", "invalid_response", "provider_error"];
+export declare const reasonCodes: readonly ['missing_credentials', 'invalid_credentials', 'credential_read_error', 'unauthorized', 'timeout', 'rate_limited', 'http_error', 'invalid_response', 'provider_error'];
 export declare const providerUsageSchema: z.ZodObject<{
     planLabel: z.ZodNullable<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
     windows: z.ZodArray<z.ZodObject<{
@@ -90,21 +90,21 @@ export declare const providerUsageSchema: z.ZodObject<{
     credentialsPresent: z.ZodBoolean;
     authenticated: z.ZodNullable<z.ZodBoolean>;
     availability: z.ZodEnum<{
-        error: "error";
         available: "available";
+        error: "error";
         unavailable: "unavailable";
     }>;
     reason: z.ZodNullable<z.ZodObject<{
         code: z.ZodEnum<{
-            missing_credentials: "missing_credentials";
-            invalid_credentials: "invalid_credentials";
             credential_read_error: "credential_read_error";
-            unauthorized: "unauthorized";
-            timeout: "timeout";
-            rate_limited: "rate_limited";
             http_error: "http_error";
+            invalid_credentials: "invalid_credentials";
             invalid_response: "invalid_response";
+            missing_credentials: "missing_credentials";
             provider_error: "provider_error";
+            rate_limited: "rate_limited";
+            timeout: "timeout";
+            unauthorized: "unauthorized";
         }>;
         message: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
     }, z.core.$strip>>;
@@ -153,21 +153,21 @@ export declare const reportSchema: z.ZodObject<{
         credentialsPresent: z.ZodBoolean;
         authenticated: z.ZodNullable<z.ZodBoolean>;
         availability: z.ZodEnum<{
-            error: "error";
             available: "available";
+            error: "error";
             unavailable: "unavailable";
         }>;
         reason: z.ZodNullable<z.ZodObject<{
             code: z.ZodEnum<{
-                missing_credentials: "missing_credentials";
-                invalid_credentials: "invalid_credentials";
                 credential_read_error: "credential_read_error";
-                unauthorized: "unauthorized";
-                timeout: "timeout";
-                rate_limited: "rate_limited";
                 http_error: "http_error";
+                invalid_credentials: "invalid_credentials";
                 invalid_response: "invalid_response";
+                missing_credentials: "missing_credentials";
                 provider_error: "provider_error";
+                rate_limited: "rate_limited";
+                timeout: "timeout";
+                unauthorized: "unauthorized";
             }>;
             message: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
         }, z.core.$strip>>;
