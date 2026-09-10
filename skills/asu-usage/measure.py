@@ -26,7 +26,7 @@ DEFAULT_LEDGER = os.path.expanduser('~/.claude/asu-ledger.jsonl')
 
 def snapshot(provider):
     """Fresh asu reading -> {window id: {label, percentUsed, resetsAt}} plus plan label."""
-    cmd = ['npx', '--yes', '@allixsenos/asu']
+    cmd = ['npx', '--yes', '@allixsenos/asu@latest']
     if provider:
         cmd.append(provider)
     cmd += ['--json', '--fresh']

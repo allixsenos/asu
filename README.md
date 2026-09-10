@@ -7,7 +7,7 @@ ASU is a local TypeScript CLI for humans and agents. It finds supported installa
 ## What it looks like
 
 ```bash
-npx --yes @allixsenos/asu
+npx --yes @allixsenos/asu@latest
 ```
 
 ```text
@@ -42,26 +42,26 @@ This is a real run against the maintainer's accounts on 2026-09-10. In a termina
 ASU needs **Node.js 22.13 or newer** and npm. Sign in through the provider's own CLI first.
 
 ```bash
-npx --yes @allixsenos/asu
+npx --yes @allixsenos/asu@latest
 ```
 
 This runs the newest release of [`@allixsenos/asu`](https://www.npmjs.com/package/@allixsenos/asu) from npm. No token is needed. Your provider credentials, which are separate, let ASU read usage.
 
 ```bash
 # Plain text for terminals, logs, and pipes
-npx --yes @allixsenos/asu --plain
+npx --yes @allixsenos/asu@latest --plain
 
 # Structured output for agents and scripts
-npx --yes @allixsenos/asu --json
+npx --yes @allixsenos/asu@latest --json
 
 # One provider, by its bare name
-npx --yes @allixsenos/asu claude
+npx --yes @allixsenos/asu@latest claude
 
 # Select accounts and bypass the five-minute usage cache
-npx --yes @allixsenos/asu claude codex copilot --fresh --table
+npx --yes @allixsenos/asu@latest claude codex copilot --fresh --table
 
 # Include every built-in provider, even if no credentials are found
-npx --yes @allixsenos/asu --all --table
+npx --yes @allixsenos/asu@latest --all --table
 ```
 
 To pin a version, name it, for example `@allixsenos/asu@0.3.0`. The `--fresh` flag refreshes provider usage. It does not select a newer package revision.
@@ -395,7 +395,7 @@ A zero exit code does not mean that every provider succeeded. When you automate 
 ### Use JSON in scripts
 
 ```bash
-npx --yes @allixsenos/asu --json > usage.json
+npx --yes @allixsenos/asu@latest --json > usage.json
 jq '.providers[] | {providerId, availability, planLabel, windows}' usage.json
 
 # Find available providers with a window at or above 80% used
@@ -483,6 +483,8 @@ An HTTP request has an eight-second deadline, a one-MiB response limit, and no r
 
 ASU reads existing credentials and sends them only to the provider endpoint of the adapter. It never refreshes a token, signs in, rewrites a provider file, runs the provider CLI to get usage, or estimates subscription consumption from conversation history. Missing or rejected credentials give an unavailable result. Sign in or refresh through the provider's own CLI.
 
+Once a day, after the report, ASU asks the npm registry for its own newest version and prints one line on stderr when a newer one exists. The request carries only the package name, and the answer is kept in the cache directory. `--no-cache`, `ASU_NO_UPDATE_CHECK=1`, `NO_UPDATE_NOTIFIER=1`, or `CI=true` turns the check off. This is the only request ASU makes to anything other than a provider.
+
 ASU prints and caches only normalized usage. It excludes tokens, refresh tokens, account IDs, and raw API errors. The cache uses private directory and file permissions on Unix, and SHA-256 filenames derived from the credential identity. A usage report still contains plan and account-usage information. The maintainer shared the examples above on purpose.
 
 ## Troubleshooting
@@ -499,13 +501,14 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 | `invalid_response` | The provider may have a new response schema. See the [known limitations](docs/provider-contracts.md#known-limitations). |
 | Usage looks stale | Examine `fetchedAt` and `cached`, then use `--fresh`. ASU cannot make the provider update its figures sooner. |
 | One provider fails but the command exits with zero | Exit code `0` means that at least one provider succeeded. Examine the `availability` of each provider. |
+| `npx --yes @allixsenos/asu` runs an old version | npx reuses the first version it cached for a bare name and never looks again. Use `@allixsenos/asu@latest`, which resolves on every run, or remove the cache with `rm -rf ~/.npm/_npx`. ASU prints a one-line notice on stderr once a day when a newer version exists. |
 
 ## Plugins
 
 A provider is an ESM module with a unique ID, a version, and three operations: detect the installation, resolve the credentials, and fetch normalized usage. An adapter owns its credential format and its API contract. The shared service and the renderers stay provider-independent.
 
 ```bash
-npx --yes @allixsenos/asu --plugin ./my-provider.mjs --provider my-provider --json
+npx --yes @allixsenos/asu@latest --plugin ./my-provider.mjs --provider my-provider --json
 ```
 
 A plugin can export `default` or `provider`. ASU resolves an installed package name from the current working directory. A plugin is local code that you load explicitly, and it has full access to the process. Load only modules that you trust. ASU does not download plugins and does not search for them. See the [plugin contract and example](docs/architecture.md#external-plugin-example) for the details. The package also exports its service, schemas, and TypeScript types as a library.
