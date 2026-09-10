@@ -531,4 +531,4 @@ release-please writes [`CHANGELOG.md`](CHANGELOG.md) and creates each release fr
 
 ## Project status
 
-Public repository under the [MIT license](LICENSE). The release workflow publishes the package to the public npm registry.
+Public repository under the [MIT license](LICENSE). The release workflow publishes the package to the public npm registry. ASU has no telemetry and never will. See the [security policy](SECURITY.md) for what that means and how to report a vulnerability.
