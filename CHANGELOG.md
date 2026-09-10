@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/allixsenos/asu/compare/v0.8.0...v0.9.0) (2026-09-10)
+
+
+### Features
+
+* **cli:** check npm once a day for a newer version ([#31](https://github.com/allixsenos/asu/issues/31)) ([41bf4e2](https://github.com/allixsenos/asu/commit/41bf4e242f0a651889fc94b6da41b8ff5568b33e))
+
 ## [0.8.0](https://github.com/allixsenos/asu/compare/v0.7.0...v0.8.0) (2026-09-10)
 
 
