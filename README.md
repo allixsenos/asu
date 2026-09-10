@@ -10,32 +10,9 @@ ASU is a local TypeScript CLI for humans and agents. It finds supported installa
 npx --yes @allixsenos/asu@latest
 ```
 
-```text
-ASU 0.7.0 · 2026-09-10T07:08:14.046Z
+![Terminal running npx --yes @allixsenos/asu@latest. ASU 0.9.0 shows three providers with one bar per window. Claude, Max 20x, active: 5 hours 30 percent resets in 17 minutes, Weekly 26 percent and Weekly Fable 22 percent reset Tuesday 15 September 07:00. Codex, Plus, active: three windows at 0 percent, 0 credits left. GitHub Copilot, Individual, active: Chat and Completions at 0 percent, Premium Interactions at 100 percent in red, 0 of 0 requests. Green bars for low usage, red for exhausted.](https://raw.githubusercontent.com/allixsenos/asu/main/assets/asu-bars.png)
 
-Claude · Max 20x · active · fresh
-  5 hours         ━━━━━─────────────────────────   18%  resets 2h 21m · 11:30
-  Weekly          ━━━━━━━───────────────────────   24%  resets 4d 21h · Tue 15 Sep 07:00
-  Weekly · Fable  ━━━━━─────────────────────────   18%  resets 4d 21h · Tue 15 Sep 07:00
-  Extra usage     Disabled
-  fetched <1m ago · cache expires in 5m
-
-Codex · Plus · active · fresh
-  5 hours               ──────────────────────────────    0%  resets 4h 59m · 14:08
-  Weekly                ──────────────────────────────    0%  resets 6d 23h · Thu 17 Sep 09:08
-  Gpt Reserve · Weekly  ──────────────────────────────    0%  resets 6d 23h · Thu 17 Sep 09:08
-  Credits               0 credits left
-  Credits available     No
-  fetched <1m ago · cache expires in 5m
-
-GitHub Copilot · Individual · active · fresh
-  Chat                  ──────────────────────────────    0%  resets 20d 16h · Thu 1 Oct 02:00  0 / 200 requests
-  Completions           ──────────────────────────────    0%  resets 20d 16h · Thu 1 Oct 02:00  0 / 2,000 requests
-  Premium Interactions  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 20d 16h · Thu 1 Oct 02:00  0 / 0 requests
-  fetched <1m ago · cache expires in 5m
-```
-
-This is a real run against the maintainer's accounts on 2026-09-10. In a terminal the bars are green below 70 percent, yellow from 70, and red from 90. Reset times are relative to the moment of the run, with the local clock after the dot. Pass `--table` for the table view, `--utc` for full timestamps, `--plain` for log-friendly text, or `--json` for agents and scripts.
+This is a real run against the maintainer's accounts on 2026-09-10. Bars are green below 70 percent, yellow from 70, and red from 90. Reset times are relative to the moment of the run, with the local clock after the dot. Pass `--table` for the table view, `--utc` for full timestamps, `--plain` for log-friendly text, or `--json` for agents and scripts. The same view as plain text is in the [snapshot section](#bars) below.
 
 ## Quick start
 
