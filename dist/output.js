@@ -187,7 +187,117 @@ export function renderTable(report, options = {}) {
 export function tableWraps(report, options = {}) {
     return buildTable(report, options).wrapped;
 }
+// Bars: one bar per window, after ccswap's dashboard card. `5 hours  ━━━╸───  12%  resets 2h 17m · 11:30`
+const BAR_WIDTH = 30;
+const sgr = (options, code, text) => options.color && text ? `\u001b[${code}m${text}\u001b[0m` : text;
+const severity = (pct) => pct >= 90 ? '31' : pct >= 70 ? '33' : '32';
+/** ccswap's countdown style, with a space between units: "45s", "12m", "2h 13m", "3d 4h". */
+function spaced(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    if (s < 60)
+        return `${s}s`;
+    if (s < 3600)
+        return `${Math.floor(s / 60)}m`;
+    if (s < 86_400) {
+        const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+        return m ? `${h}h ${m}m` : `${h}h`;
+    }
+    const d = Math.floor(s / 86_400), h = Math.floor(s % 86_400 / 3600);
+    return h ? `${d}d ${h}h` : `${d}d`;
+}
+const clockParts = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+/** Local clock: "11:30" on the same day, otherwise "Tue 15 Sep 07:00". */
+function clock(at, now) {
+    const part = (type) => clockParts.formatToParts(at).find(item => item.type === type)?.value ?? '';
+    const time = `${part('hour')}:${part('minute')}`;
+    return new Date(at).toDateString() === new Date(now).toDateString() ? time : `${dayLabel.format(at)} ${time}`;
+}
+function resetSuffix(iso, options, layout) {
+    if (iso === null)
+        return '';
+    if (options.utc)
+        return `resets ${iso}`;
+    const now = options.now ?? Date.now(), at = Date.parse(iso), diff = at - now;
+    if (diff <= 0)
+        return 'resets now';
+    return layout.clock ? `resets ${spaced(diff)} · ${clock(at, now)}` : `resets ${spaced(diff)}`;
+}
+function bar(pct, options, layout) {
+    const width = layout.barWidth;
+    if (pct === null)
+        return sgr(options, '2', '─'.repeat(width));
+    const cells = Math.min(Math.max(pct, 0), 100) / 100 * width;
+    const full = Math.floor(cells), half = cells - full >= 0.5 && full < width;
+    return sgr(options, severity(pct), '━'.repeat(full) + (half ? '╸' : '')) + sgr(options, '2', '─'.repeat(width - full - (half ? 1 : 0)));
+}
+function quantity(window) {
+    const unit = window.unit ? ` ${window.unit}` : '';
+    if (window.used !== undefined)
+        return `${amount(window.used)}${window.limit === undefined ? '' : ` / ${amount(window.limit)}`}${unit}`;
+    return window.limit === undefined ? '' : `limit ${amount(window.limit)}${unit}`;
+}
+function buildBarLines(report, options, layout) {
+    const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`];
+    for (const provider of report.providers) {
+        const freshness = provider.availability === 'available' ? (provider.cached ? 'cached' : 'fresh') : null;
+        lines.push('', sgr(options, '1', [provider.displayName + (provider.experimental ? ' [experimental]' : ''), provider.planLabel, status(provider), freshness]
+            .filter(Boolean).join(' · ')));
+        const labels = [...provider.windows, ...provider.balances, ...provider.details].map(item => item.label);
+        const labelWidth = Math.max(0, ...labels.map(textWidth));
+        const cell = (label) => sgr(options, '2', label + ' '.repeat(labelWidth - textWidth(label)));
+        for (const window of provider.windows) {
+            const parts = [`  ${cell(window.label)}  ${bar(window.unlimited ? null : window.percentUsed, options, layout)}`];
+            if (window.unlimited)
+                parts.push(sgr(options, '2', 'unlimited'));
+            else if (window.percentUsed === null)
+                parts.push(sgr(options, '2', 'usage unknown'));
+            else
+                parts.push(sgr(options, severity(window.percentUsed), `${amount(window.percentUsed).padStart(3)}%`));
+            for (const extra of [resetSuffix(window.resetsAt, options, layout), quantity(window)])
+                if (extra)
+                    parts.push(sgr(options, '2', extra));
+            lines.push(parts.join('  '));
+        }
+        for (const balance of provider.balances)
+            lines.push(`  ${cell(balance.label)}  ${balanceValue(balance)}`);
+        for (const detail of provider.details)
+            lines.push(`  ${cell(detail.label)}  ${detailValue(detail.value, options)}`);
+        if (provider.reason)
+            lines.push(`  ${provider.reason.code}: ${provider.reason.message}`);
+        lines.push(sgr(options, '2', `  fetched ${ago(provider.fetchedAt, options)} · cache expires ${ahead(provider.expiresAt, options)}`));
+    }
+    if (!report.providers.length)
+        lines.push('', 'No supported agents or credentials detected. Use --all to list every provider.');
+    for (const warning of report.warnings)
+        lines.push('', `Warning: ${warning}`);
+    return lines;
+}
+/** Fit the view to the width like ccswap does: shrink the bar to 12 cells first, then drop the clock. */
+function buildBars(report, options) {
+    const columns = options.columns ?? 110;
+    const widest = (layout) => Math.max(0, ...buildBarLines(report, { ...options, color: false }, layout).map(textWidth));
+    let layout = { barWidth: BAR_WIDTH, clock: true };
+    const excess = widest(layout) - columns;
+    if (excess > 0)
+        layout = { barWidth: Math.max(12, BAR_WIDTH - excess), clock: true };
+    if (widest(layout) > columns)
+        layout = { barWidth: 12, clock: false };
+    return { lines: buildBarLines(report, options, layout), overflow: widest(layout) > columns };
+}
+export function renderBars(report, options = {}) {
+    return buildBars(report, options).lines.join('\n') + '\n';
+}
+/** True when even the narrowest bar layout exceeds the width. The CLI then prefers plain output unless bars were requested. */
+export function barsOverflow(report, options = {}) {
+    return buildBars(report, options).overflow;
+}
 export function render(report, format, options = {}) {
-    return format === 'json' ? JSON.stringify(report, null, 2) + '\n' : format === 'table' ? renderTable(report, options) : renderPlain(report, options);
+    if (format === 'json')
+        return JSON.stringify(report, null, 2) + '\n';
+    if (format === 'table')
+        return renderTable(report, options);
+    if (format === 'bars')
+        return renderBars(report, options);
+    return renderPlain(report, options);
 }
 //# sourceMappingURL=output.js.map

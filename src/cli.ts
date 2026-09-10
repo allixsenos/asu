@@ -7,7 +7,7 @@ import { UsageCache } from './cache.js';
 import { createLocalContext, homePath } from './local.js';
 import { loadProviders } from './registry.js';
 import { UsageService } from './service.js';
-import { render, tableWraps } from './output.js';
+import { barsOverflow, render, tableWraps } from './output.js';
 import type { OutputFormat } from './output.js';
 import { version } from './version.js';
 
@@ -19,10 +19,12 @@ Usage: asu [usage] [provider...] [options]
   asu claude                 One provider, by its bare name
   asu claude codex --plain   Several providers, with options anywhere
 
-  --format plain|table|json   Output format (table in a terminal, plain when piped or when the table would wrap)
-  --json                     Shortcut for --format json
-  --plain                    Shortcut for --format plain
+  --format plain|table|bars|json
+                             Output format (bars in a terminal, plain when piped or when a line would wrap)
+  --bars                     Shortcut for --format bars: one bar per window, colored in a terminal
   --table                    Shortcut for --format table
+  --plain                    Shortcut for --format plain
+  --json                     Shortcut for --format json
   --utc                      Print full UTC timestamps instead of times relative to now
   --provider <id>             Select provider; same as a bare name, repeat or use comma-separated IDs
   --all                      Include providers with no detected install or credentials
@@ -40,10 +42,10 @@ Exit codes: 0 at least one available provider; 1 none available; 2 invocation er
 `;
 
 export async function run(args = process.argv.slice(2)): Promise<number> {
-  let format: OutputFormat = process.stdout.isTTY ? 'table' : 'plain';
+  let format: OutputFormat = process.stdout.isTTY ? 'bars' : 'plain';
   try {
     const { values, positionals } = parseArgs({ args, allowPositionals: true, strict: true, options: {
-      format: { type: 'string' }, json: { type: 'boolean' }, plain: { type: 'boolean' }, table: { type: 'boolean' }, utc: { type: 'boolean' },
+      format: { type: 'string' }, json: { type: 'boolean' }, plain: { type: 'boolean' }, table: { type: 'boolean' }, bars: { type: 'boolean' }, utc: { type: 'boolean' },
       provider: { type: 'string', multiple: true }, all: { type: 'boolean' }, fresh: { type: 'boolean' },
       'no-cache': { type: 'boolean' }, 'cache-dir': { type: 'string' }, plugin: { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' },
@@ -52,8 +54,8 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
     if (values.version) { process.stdout.write(`${version}\n`); return 0; }
     // Bare words are provider names. A leading "usage" stays accepted for compatibility.
     const names = positionals[0] === 'usage' ? positionals.slice(1) : positionals;
-    const formats = [values.format, values.json ? 'json' : undefined, values.plain ? 'plain' : undefined, values.table ? 'table' : undefined].filter(Boolean);
-    if (formats.length > 1 || formats.some(value => !['plain', 'table', 'json'].includes(value!))) throw new Error('Choose one output format: plain, table, or json.');
+    const formats = [values.format, values.json ? 'json' : undefined, values.plain ? 'plain' : undefined, values.table ? 'table' : undefined, values.bars ? 'bars' : undefined].filter(Boolean);
+    if (formats.length > 1 || formats.some(value => !['plain', 'table', 'bars', 'json'].includes(value!))) throw new Error('Choose one output format: plain, table, bars, or json.');
     const explicit = formats.length > 0;
     format = formats[0] as OutputFormat ?? format;
     const providers = await loadProviders(values.plugin);
@@ -67,14 +69,15 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
     const report = await service.collect({ providerIds, fresh: values.fresh });
     if (!values.all && !providerIds?.length) report.providers = report.providers.filter(provider =>
       provider.installed || provider.credentialsPresent || provider.reason?.code !== 'missing_credentials');
-    const options = { columns: process.stdout.columns, utc: values.utc };
-    // A table that must wrap in a narrow terminal is harder to read than plain text.
+    const options = { columns: process.stdout.columns, utc: values.utc, color: Boolean(process.stdout.isTTY && !process.env.NO_COLOR) };
+    // A view that must wrap in a narrow terminal is harder to read than plain text.
     if (format === 'table' && !explicit && tableWraps(report, options)) format = 'plain';
+    if (format === 'bars' && !explicit && barsOverflow(report, options)) format = 'plain';
     process.stdout.write(render(report, format, options));
     return report.providers.some(provider => provider.availability === 'available') ? 0 : 1;
   } catch (error) {
     // All errors exposed here are ours; do not print plugin/import/runtime exception messages.
-    const messages = ['Choose one output format: plain, table, or json.',
+    const messages = ['Choose one output format: plain, table, bars, or json.',
       'Unknown provider ID. See --help for built-ins.', 'Could not load a provider plugin. Check its path, exports, and unique provider ID.'];
     const message = error instanceof Error && messages.includes(error.message) ? error.message : 'Could not run ASU. Check arguments and plugin configuration; see --help.';
     process.stderr.write(`asu: ${message}\n`);
