@@ -3,6 +3,7 @@ import { parse } from 'yaml';
 import { UsageError } from '../errors.js';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
+import { opencodeEntry } from './opencode.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, ratio, requireUsage, slug, string, timestamp, title } from './parse.js';
 export function normalizeCopilot(payload) {
     const raw = object(payload), data = emptyUsage();
@@ -37,22 +38,29 @@ export const copilot = {
             return { token: envToken };
         const config = homePath(context, context.env.GH_CONFIG_DIR, context.env.XDG_CONFIG_HOME ? join(context.env.XDG_CONFIG_HOME, 'gh') : '.config/gh');
         const text = await context.readText(join(config, 'hosts.yml'));
-        if (text === null)
-            return null;
-        try {
-            const root = credentialObject(parse(text, { maxAliasCount: 0 }));
-            if (!root['github.com'])
-                return null;
-            const github = credentialObject(root['github.com']);
-            const user = string(github.user);
-            const users = github.users == null ? {} : credentialObject(github.users);
-            const current = user && users[user] ? credentialObject(users[user]) : {};
-            const token = string(github.oauth_token) ?? string(current.oauth_token);
-            return token ? { token } : null;
+        if (text !== null) {
+            try {
+                const root = credentialObject(parse(text, { maxAliasCount: 0 }));
+                if (root['github.com']) {
+                    const github = credentialObject(root['github.com']);
+                    const user = string(github.user);
+                    const users = github.users == null ? {} : credentialObject(github.users);
+                    const current = user && users[user] ? credentialObject(users[user]) : {};
+                    const token = string(github.oauth_token) ?? string(current.oauth_token);
+                    if (token)
+                        return { token };
+                }
+            }
+            catch {
+                throw new UsageError('invalid_credentials');
+            }
         }
-        catch {
-            throw new UsageError('invalid_credentials');
-        }
+        // opencode stores the GitHub device-flow token in both `refresh` and `access`, with `expires: 0`.
+        // An entry with `enterpriseUrl` belongs to a GitHub Enterprise host, not api.github.com.
+        const found = await opencodeEntry(context, ['github-copilot']);
+        if (found?.entry.type === 'oauth' && !found.entry.enterpriseUrl)
+            return { token: found.entry.refresh ?? found.entry.access };
+        return null;
     },
     async fetchUsage(context, credentials) {
         return normalizeCopilot(await context.request('https://api.github.com/copilot_internal/user', {

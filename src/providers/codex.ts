@@ -3,6 +3,7 @@ import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
 import type { Provider } from './base.js';
+import { oauthCredentials, opencodeEntry } from './opencode.js';
 import { credentialObject, list, nonnegative, number, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 
 export function normalizeCodex(payload: unknown, now = Date.now()): UsageData {
@@ -51,6 +52,9 @@ export const codex: Provider = {
       const tokens = credentialObject(root.tokens), token = string(tokens.access_token);
       if (token) return { token, accountId: string(tokens.account_id) };
     }
+    // opencode's ChatGPT login. An `api` entry under `openai` is a platform API key, which the usage endpoint does not accept.
+    const found = await opencodeEntry(context, ['openai']);
+    if (found?.entry.type === 'oauth') return { ...oauthCredentials(found.entry), accountId: found.entry.accountId };
     return null;
   },
   async fetchUsage(context, credentials) {

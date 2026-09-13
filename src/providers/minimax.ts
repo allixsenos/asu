@@ -4,6 +4,7 @@ import { detectCommands } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
 import type { Credentials, Provider } from './base.js';
+import { opencodeEntry } from './opencode.js';
 import { credentialObject, list, nonnegative, object, optionalObject, percent, ratio, requireUsage, slug, string, timestamp } from './parse.js';
 
 function baseUrl(value: string | undefined, region?: string): string {
@@ -50,11 +51,16 @@ export const minimax: Provider = {
       if (token) return auth(token, string(credentials.resource_url), undefined, credentials.expires_at);
     }
     const configRaw = await context.readJson(join(context.home, '.mmx', 'config.json'));
-    if (configRaw == null) return null;
-    const config = credentialObject(configRaw), apiKey = string(config.api_key);
-    if (apiKey) return auth(apiKey, string(config.base_url), string(config.region));
-    const oauth = config.oauth == null ? {} : credentialObject(config.oauth), accessToken = string(oauth.access_token);
-    return accessToken ? auth(accessToken, string(oauth.resource_url) ?? string(config.base_url), string(config.region), oauth.expires_at) : null;
+    if (configRaw != null) {
+      const config = credentialObject(configRaw), apiKey = string(config.api_key);
+      if (apiKey) return auth(apiKey, string(config.base_url), string(config.region));
+      const oauth = config.oauth == null ? {} : credentialObject(config.oauth), accessToken = string(oauth.access_token);
+      if (accessToken) return auth(accessToken, string(oauth.resource_url) ?? string(config.base_url), string(config.region), oauth.expires_at);
+    }
+    // opencode's coding plan keys. The `cn` plan uses the China host.
+    const found = await opencodeEntry(context, ['minimax-coding-plan', 'minimax-cn-coding-plan']);
+    if (found?.entry.type !== 'api') return null;
+    return auth(found.entry.key, undefined, found.id === 'minimax-cn-coding-plan' ? 'cn' : undefined);
   },
   async fetchUsage(context, credentials) {
     return normalizeMiniMax(await context.request(`${credentials.metadata?.baseUrl ?? 'https://api.minimax.io'}/v1/token_plan/remains`, {

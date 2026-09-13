@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { UsageError } from '../errors.js';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
+import { oauthCredentials, opencodeEntry } from './opencode.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 function sameScope(a, b) {
     return ['model', 'surface'].every(dimension => {
@@ -153,6 +154,10 @@ export const claude = {
                 }
             }
         }
+        // An opencode login is the last resort. opencode stores no plan metadata, so the plan label stays unknown.
+        const found = await opencodeEntry(context, ['anthropic']);
+        if (found?.entry.type === 'oauth')
+            return oauthCredentials(found.entry);
         if (failure)
             throw failure;
         return null;

@@ -3,6 +3,7 @@ import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
 import type { Provider } from './base.js';
+import { opencodeEntry } from './opencode.js';
 import { countWindow, credentialObject, list, nonnegative, object, optionalObject, requireUsage, string, timestamp } from './parse.js';
 
 export function normalizeKimi(payload: unknown): UsageData {
@@ -34,7 +35,8 @@ export const kimi: Provider = {
       const auth = credentialObject(raw), token = string(auth.access_token);
       if (token) { const expiry = timestamp(auth.expires_at); return { token, expiresAt: expiry ? Date.parse(expiry) : undefined }; }
     }
-    return null;
+    const found = await opencodeEntry(context, ['kimi-for-coding']);
+    return found?.entry.type === 'api' ? { token: found.entry.key } : null;
   },
   async fetchUsage(context, credentials) {
     return normalizeKimi(await context.request('https://api.kimi.com/coding/v1/usages', {

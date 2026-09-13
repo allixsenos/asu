@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
+import { oauthCredentials, opencodeEntry } from './opencode.js';
 import { credentialObject, list, nonnegative, number, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 export function normalizeCodex(payload, now = Date.now()) {
     const raw = object(payload), data = emptyUsage();
@@ -53,6 +54,10 @@ export const codex = {
             if (token)
                 return { token, accountId: string(tokens.account_id) };
         }
+        // opencode's ChatGPT login. An `api` entry under `openai` is a platform API key, which the usage endpoint does not accept.
+        const found = await opencodeEntry(context, ['openai']);
+        if (found?.entry.type === 'oauth')
+            return { ...oauthCredentials(found.entry), accountId: found.entry.accountId };
         return null;
     },
     async fetchUsage(context, credentials) {

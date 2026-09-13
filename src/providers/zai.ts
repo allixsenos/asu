@@ -2,6 +2,7 @@ import { UsageError } from '../errors.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
 import type { Provider } from './base.js';
+import { opencodeEntry } from './opencode.js';
 import { list, nonnegative, object, percent, requireUsage, slug, string, timestamp } from './parse.js';
 
 function envelope(payload: unknown): unknown {
@@ -42,7 +43,10 @@ export const zai: Provider = {
   detect: async () => null,
   async resolveCredentials(context) {
     const token = string(context.env.ZAI_API_KEY) ?? string(context.env.GLM_API_KEY);
-    return token ? { token } : null;
+    if (token) return { token };
+    // Only the coding plan key. opencode's `zai` entry is a pay-as-you-go key with no plan quota.
+    const found = await opencodeEntry(context, ['zai-coding-plan']);
+    return found?.entry.type === 'api' ? { token: found.entry.key } : null;
   },
   async fetchUsage(context, credentials) {
     const [plan, quota] = await Promise.allSettled([

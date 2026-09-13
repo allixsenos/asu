@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { detectCommands } from '../local.js';
 import { emptyUsage } from '../models.js';
+import { oauthCredentials, opencodeEntry } from './opencode.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, ratio, requireUsage, string, timestamp } from './parse.js';
 function cents(raw) {
     if (raw == null)
@@ -36,19 +37,23 @@ export const grok = {
         if (token)
             return { token };
         const raw = await context.readJson(join(context.home, '.grok', 'auth.json'));
-        if (raw == null)
-            return null;
-        const auth = credentialObject(raw), legacy = string(auth.access_token);
-        if (legacy)
-            return { token: legacy };
-        for (const [key, value] of Object.entries(auth)) {
-            if (!key.startsWith('https://auth.x.ai::'))
-                continue;
-            const token = string(credentialObject(value).key);
-            if (token)
-                return { token };
+        if (raw != null) {
+            const auth = credentialObject(raw), legacy = string(auth.access_token);
+            if (legacy)
+                return { token: legacy };
+            for (const [key, value] of Object.entries(auth)) {
+                if (!key.startsWith('https://auth.x.ai::'))
+                    continue;
+                const token = string(credentialObject(value).key);
+                if (token)
+                    return { token };
+            }
         }
-        return null;
+        // opencode's xAI login, OAuth or API key. Unverified against the Grok CLI billing endpoint.
+        const found = await opencodeEntry(context, ['xai']);
+        if (!found)
+            return null;
+        return found.entry.type === 'oauth' ? oauthCredentials(found.entry) : { token: found.entry.key };
     },
     async fetchUsage(context, credentials) {
         return normalizeGrok(await context.request('https://cli-chat-proxy.grok.com/v1/billing?format=credits', {

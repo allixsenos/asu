@@ -412,14 +412,14 @@ An unknown percentage or reset time is `null`. A missing quantity or balance doe
 
 | ID | Provider | Credential sources, in precedence order | Validation |
 | --- | --- | --- | --- |
-| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`. macOS Keychain fallback. | Live account, Linux |
-| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json` | Live account, Linux |
-| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, GitHub CLI `hosts.yml` | Live account, Linux |
+| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`. macOS Keychain fallback. opencode `anthropic`. | Live account, Linux. opencode source fixture tests only. |
+| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json`, opencode `openai` | Live account, Linux. opencode source fixture tests only. |
+| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, GitHub CLI `hosts.yml`, opencode `github-copilot` | Live account, Linux. opencode source fixture tests only. |
 | `cursor` | Cursor | `CURSOR_ACCESS_TOKEN`, `CURSOR_TOKEN`, desktop SQLite, `~/.config/cursor/auth.json` | Experimental. Fixture tests only. |
-| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY` | Experimental. Fixture tests only. |
-| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json` | Experimental. Fixture tests only. |
-| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME` or `~/.kimi-code`, legacy `~/.kimi` | Experimental. Fixture tests only. |
-| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json` | Experimental. Fixture tests only. |
+| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY`, opencode `zai-coding-plan` | Experimental. Fixture tests only. |
+| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json`, opencode `xai` | Experimental. Fixture tests only. |
+| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME` or `~/.kimi-code`, legacy `~/.kimi`, opencode `kimi-for-coding` | Experimental. Fixture tests only. |
+| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json`, opencode `minimax-coding-plan` or `minimax-cn-coding-plan` | Experimental. Fixture tests only. |
 
 Only Claude Max 20x, Codex Plus, and GitHub Copilot Individual passed a check against the maintainer's live accounts. The other five adapters always return `experimental: true`, and the human output marks them. A passed fixture test does not prove a live subscription or every credential-store variant. The macOS and Windows paths have no live test.
 
@@ -431,6 +431,7 @@ Credential lookup details:
 - Cursor reads its desktop `state.vscdb` in read-only mode. It uses the platform locations, including macOS Application Support and Windows `APPDATA`. The Linux lookup obeys `XDG_CONFIG_HOME`.
 - Kimi's credential file is `credentials/kimi-code.json` under its configured or default home.
 - MiniMax supports `MINIMAX_REGION=cn` or a recognized `MINIMAX_BASE_URL`. ASU rejects an arbitrary API destination.
+- opencode keeps every login in `$XDG_DATA_HOME/opencode/auth.json`, or `~/.local/share/opencode/auth.json` when `XDG_DATA_HOME` is not set, on every platform. ASU reads that file after each provider's own sources, so a login made only through opencode still reports usage. ASU never refreshes an opencode token. An expired one reports `invalid_credentials` until opencode refreshes it.
 
 The APIs include undocumented internal endpoints and can change. The request methods, schemas, primary sources, and limitations of each adapter are in [provider contracts](docs/provider-contracts.md).
 

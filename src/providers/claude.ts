@@ -5,6 +5,7 @@ import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
 import type { Credentials, Provider } from './base.js';
+import { oauthCredentials, opencodeEntry } from './opencode.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 
 interface Scope { model?: { id?: string; name: string }; surface?: { id?: string; name: string } }
@@ -116,6 +117,9 @@ export const claude: Provider = {
         catch { failure = new UsageError('invalid_credentials'); }
       }
     }
+    // An opencode login is the last resort. opencode stores no plan metadata, so the plan label stays unknown.
+    const found = await opencodeEntry(context, ['anthropic']);
+    if (found?.entry.type === 'oauth') return oauthCredentials(found.entry);
     if (failure) throw failure;
     return null;
   },
