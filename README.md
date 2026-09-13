@@ -53,49 +53,49 @@ This needs Git. The repository commits the built `dist/` directory, so the insta
 
 ## Real account output
 
-We fetched the snapshot below on **2026-09-13 at 11:08 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
+We fetched the snapshot below on **2026-09-13 at 11:10 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
 
 Each block below is the recorded output of one of these commands, run one after another from the local checkout:
 
 ```bash
 node dist/cli.js claude codex copilot --fresh --json
-node dist/cli.js claude codex copilot --bars --utc
-node dist/cli.js claude codex copilot --table --utc
-node dist/cli.js claude codex copilot --plain --utc
+node dist/cli.js claude codex copilot --bars
+node dist/cli.js claude codex copilot --table
+node dist/cli.js claude codex copilot --plain
 ```
 
-The first run fetched fresh figures. The other three ran inside the five-minute cache, so all four show the same figures and only the report timestamp differs. The output went to a file, so it has no colors. The examples include no credentials and no account identifiers. All reset times are UTC.
+The first run fetched fresh figures. The other three ran inside the five-minute cache, so all four show the same figures and only the report timestamp differs. The output went to a file, so it has no colors. The examples include no credentials and no account identifiers.
 
-Without `--utc`, the table and the plain text show reset, fetch, and expiry times relative to now, for example `2h30m` or `45m`. A time a day or more away also names the local calendar day, for example `7d (Tue 15 Sep)`. A reset time that already passed shows as `now`. JSON always contains the full UTC timestamps.
+The bars, the table, and the plain text show reset, fetch, and expiry times relative to the moment of the run, for example `2h30m` or `45m`. A time a day or more away also names the calendar day, and the bars add the local clock time of the recording machine. A reset time that already passed shows as `now`. Pass `--utc` for full UTC timestamps. JSON always contains them.
 
 ### Bars
 
 Use `--bars` for this view. It is the default in an interactive terminal. One bar per window, colored by severity in a terminal, with the countdown and the local clock after each bar. The bar shrinks in a narrow terminal, then the clock goes, and below that the default falls back to plain text.
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:08:35.030Z
+ASU 0.9.0 · 2026-09-13T11:10:44.216Z
 
 Claude · Max 20x · active · cached
-  5 hours         ━──────────────────────────    5%  resets 2026-09-13T14:30:00.000Z
-  Weekly          ━━━━━━━━━━━━━━━━━━━━━──────   78%  resets 2026-09-15T05:00:00.000Z
-  Weekly · Fable  ━━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 2026-09-15T05:00:00.000Z
+  5 hours         ━─────────────────────────    5%  resets 3h 19m · 16:30
+  Weekly          ━━━━━━━━━━━━━━━━━━━━──────   78%  resets 1d 17h · Tue 15 Sep 07:00
+  Weekly · Fable  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 1d 17h · Tue 15 Sep 07:00
   Extra usage     Disabled
-  fetched 2026-09-13T11:08:34.618Z · cache expires 2026-09-13T11:13:34.618Z
+  fetched <1m ago · cache expires in 5m
 
 Codex · Prolite · active · cached
-  Weekly                         ━──────────────────────────    4%  resets 2026-09-20T10:37:55.000Z
-  GPT 5.3 Codex Spark · 5 hours  ───────────────────────────    0%  resets 2026-09-13T16:08:34.000Z
-  GPT 5.3 Codex Spark · Weekly   ───────────────────────────    0%  resets 2026-09-20T10:35:37.000Z
-  Gpt Reserve · Weekly           ───────────────────────────    0%  resets 2026-09-20T10:35:37.000Z
+  Weekly                         ━─────────────────────────    4%  resets 6d 23h · Sun 20 Sep 12:37
+  GPT 5.3 Codex Spark · 5 hours  ──────────────────────────    0%  resets 4h 59m · 18:10
+  GPT 5.3 Codex Spark · Weekly   ──────────────────────────    0%  resets 6d 23h · Sun 20 Sep 12:35
+  Gpt Reserve · Weekly           ──────────────────────────    0%  resets 6d 23h · Sun 20 Sep 12:35
   Credits                        0 credits left
   Credits available              No
-  fetched 2026-09-13T11:08:34.857Z · cache expires 2026-09-13T11:13:34.857Z
+  fetched <1m ago · cache expires in 5m
 
 GitHub Copilot · Individual · active · cached
-  Chat                  ───────────────────────────    0%  resets 2026-10-01T00:00:00.000Z  0 / 200 requests
-  Completions           ───────────────────────────    0%  resets 2026-10-01T00:00:00.000Z  0 / 2,000 requests
-  Premium Interactions  ━━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 2026-10-01T00:00:00.000Z  0 / 0 requests
-  fetched 2026-09-13T11:08:34.735Z · cache expires 2026-09-13T11:13:34.735Z
+  Chat                  ──────────────────────────    0%  resets 17d 12h · Thu 1 Oct 02:00  0 / 200 requests
+  Completions           ──────────────────────────    0%  resets 17d 12h · Thu 1 Oct 02:00  0 / 2,000 requests
+  Premium Interactions  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 17d 12h · Thu 1 Oct 02:00  0 / 0 requests
+  fetched <1m ago · cache expires in 5m
 ```
 
 ### Pretty table
@@ -103,34 +103,34 @@ GitHub Copilot · Individual · active · cached
 Use `--table` for this view. When a cell would wrap, the default falls back to plain text. Pass `--table` to force the table.
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:08:35.202Z
+ASU 0.9.0 · 2026-09-13T11:10:44.391Z
 ┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
-│ Provider         │ Plan               │ Window / balance      │ Usage                 │ Resets (UTC)       │
+│ Provider         │ Plan               │ Window / balance      │ Usage                 │ Resets in          │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Claude           │ Max 20x            │ 5 hours               │ 5% used               │ 2026-09-13 14:30   │
-│ active           │                    │ Weekly                │ 78% used              │ 2026-09-15 05:00   │
-│ cached           │                    │ Weekly · Fable        │ 100% used             │ 2026-09-15 05:00   │
+│ Claude           │ Max 20x            │ 5 hours               │ 5% used               │ 3h19m              │
+│ active           │                    │ Weekly                │ 78% used              │ 1d17h (Tue 15 Sep) │
+│ cached           │                    │ Weekly · Fable        │ 100% used             │ 1d17h (Tue 15 Sep) │
 │                  │                    │ Extra usage           │ Disabled              │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Codex            │ Prolite            │ Weekly                │ 4% used               │ 2026-09-20 10:37   │
-│ active           │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 2026-09-13 16:08   │
+│ Codex            │ Prolite            │ Weekly                │ 4% used               │ 6d23h (Sun 20 Sep) │
+│ active           │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 5h                 │
 │ cached           │                    │  5 hours              │                       │                    │
-│                  │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 2026-09-20 10:35   │
+│                  │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 6d23h (Sun 20 Sep) │
 │                  │                    │  Weekly               │                       │                    │
-│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 2026-09-20 10:35   │
+│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 6d23h (Sun 20 Sep) │
 │                  │                    │ Credits               │ 0 credits left        │ —                  │
 │                  │                    │ Credits available     │ No                    │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 2026-10-01 00:00   │
+│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 17d12h (Thu 1 Oct) │
 │ active           │                    │                       │ 0 / 200 requests      │                    │
-│ cached           │                    │ Completions           │ 0% used               │ 2026-10-01 00:00   │
+│ cached           │                    │ Completions           │ 0% used               │ 17d12h (Thu 1 Oct) │
 │                  │                    │                       │ 0 / 2,000 requests    │                    │
-│                  │                    │ Premium Interactions  │ 100% used             │ 2026-10-01 00:00   │
+│                  │                    │ Premium Interactions  │ 100% used             │ 17d12h (Thu 1 Oct) │
 │                  │                    │                       │ 0 / 0 requests        │                    │
 └──────────────────┴────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
-Claude: fetched 2026-09-13T11:08:34.618Z; cache expires 2026-09-13T11:13:34.618Z.
-Codex: fetched 2026-09-13T11:08:34.857Z; cache expires 2026-09-13T11:13:34.857Z.
-GitHub Copilot: fetched 2026-09-13T11:08:34.735Z; cache expires 2026-09-13T11:13:34.735Z.
+Claude: fetched <1m ago; cache expires in 5m.
+Codex: fetched <1m ago; cache expires in 5m.
+GitHub Copilot: fetched <1m ago; cache expires in 5m.
 ```
 
 Read Copilot's premium row with care. The endpoint returned zero entitlement, zero remaining requests, and zero percent remaining. ASU therefore shows `100% used` next to `0 / 0 requests`. This does **not** show that anyone consumed a premium request. The internal endpoint can return legacy quota information. Treat its quantities as the provider's reported snapshot, not as a complete billing statement.
@@ -143,35 +143,35 @@ Use `--plain` for readable output in logs and pipes. It is the default when stdo
 <summary>Show the complete plain-text output</summary>
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:08:35.374Z
+ASU 0.9.0 · 2026-09-13T11:10:44.559Z
 
 Claude (claude)
   active
   Plan: Max 20x
-  5 hours: 5% used; resets 2026-09-13T14:30:00.000Z
-  Weekly: 78% used; resets 2026-09-15T05:00:00.000Z
-  Weekly · Fable: 100% used; resets 2026-09-15T05:00:00.000Z
+  5 hours: 5% used; resets in 3h19m
+  Weekly: 78% used; resets in 1d17h (Tue 15 Sep)
+  Weekly · Fable: 100% used; resets in 1d17h (Tue 15 Sep)
   Extra usage: Disabled
-  Fetched 2026-09-13T11:08:34.618Z; cached; expires 2026-09-13T11:13:34.618Z
+  Fetched <1m ago; cached; expires in 5m
 
 Codex (codex)
   active
   Plan: Prolite
-  Weekly: 4% used; resets 2026-09-20T10:37:55.000Z
-  GPT 5.3 Codex Spark · 5 hours: 0% used; resets 2026-09-13T16:08:34.000Z
-  GPT 5.3 Codex Spark · Weekly: 0% used; resets 2026-09-20T10:35:37.000Z
-  Gpt Reserve · Weekly: 0% used; resets 2026-09-20T10:35:37.000Z
+  Weekly: 4% used; resets in 6d23h (Sun 20 Sep)
+  GPT 5.3 Codex Spark · 5 hours: 0% used; resets in 5h
+  GPT 5.3 Codex Spark · Weekly: 0% used; resets in 6d23h (Sun 20 Sep)
+  Gpt Reserve · Weekly: 0% used; resets in 6d23h (Sun 20 Sep)
   Credits: 0 credits left
   Credits available: No
-  Fetched 2026-09-13T11:08:34.857Z; cached; expires 2026-09-13T11:13:34.857Z
+  Fetched <1m ago; cached; expires in 5m
 
 GitHub Copilot (copilot)
   active
   Plan: Individual
-  Chat: 0% used; 0 / 200 requests; resets 2026-10-01T00:00:00.000Z
-  Completions: 0% used; 0 / 2,000 requests; resets 2026-10-01T00:00:00.000Z
-  Premium Interactions: 100% used; 0 / 0 requests; resets 2026-10-01T00:00:00.000Z
-  Fetched 2026-09-13T11:08:34.735Z; cached; expires 2026-09-13T11:13:34.735Z
+  Chat: 0% used; 0 / 200 requests; resets in 17d12h (Thu 1 Oct)
+  Completions: 0% used; 0 / 2,000 requests; resets in 17d12h (Thu 1 Oct)
+  Premium Interactions: 100% used; 0 / 0 requests; resets in 17d12h (Thu 1 Oct)
+  Fetched <1m ago; cached; expires in 5m
 ```
 
 </details>
@@ -187,7 +187,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
 {
   "schemaVersion": 1,
   "asuVersion": "0.9.0",
-  "generatedAt": "2026-09-13T11:08:34.858Z",
+  "generatedAt": "2026-09-13T11:10:44.042Z",
   "warnings": [],
   "providers": [
     {
@@ -197,13 +197,13 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
           "id": "five_hour",
           "label": "5 hours",
           "percentUsed": 5,
-          "resetsAt": "2026-09-13T14:30:00.000Z"
+          "resetsAt": "2026-09-13T14:30:01.000Z"
         },
         {
           "id": "seven_day",
           "label": "Weekly",
           "percentUsed": 78,
-          "resetsAt": "2026-09-15T05:00:00.000Z"
+          "resetsAt": "2026-09-15T05:00:01.000Z"
         },
         {
           "id": "weekly-model-fable",
@@ -230,8 +230,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:08:34.618Z",
-      "expiresAt": "2026-09-13T11:13:34.618Z",
+      "fetchedAt": "2026-09-13T11:10:43.895Z",
+      "expiresAt": "2026-09-13T11:15:43.895Z",
       "cached": false
     },
     {
@@ -247,7 +247,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
           "id": "additional-0-gpt-5-3-codex-spark-primary_window",
           "label": "GPT 5.3 Codex Spark · 5 hours",
           "percentUsed": 0,
-          "resetsAt": "2026-09-13T16:08:34.000Z"
+          "resetsAt": "2026-09-13T16:10:44.000Z"
         },
         {
           "id": "additional-0-gpt-5-3-codex-spark-secondary_window",
@@ -285,8 +285,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:08:34.857Z",
-      "expiresAt": "2026-09-13T11:13:34.857Z",
+      "fetchedAt": "2026-09-13T11:10:44.041Z",
+      "expiresAt": "2026-09-13T11:15:44.041Z",
       "cached": false
     },
     {
@@ -333,8 +333,8 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:08:34.735Z",
-      "expiresAt": "2026-09-13T11:13:34.735Z",
+      "fetchedAt": "2026-09-13T11:10:43.927Z",
+      "expiresAt": "2026-09-13T11:15:43.927Z",
       "cached": false
     }
   ]
