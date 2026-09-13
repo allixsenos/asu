@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/allixsenos/asu/compare/v0.9.0...v0.10.0) (2026-09-13)
+
+
+### Features
+
+* **cli:** stack status and freshness under the provider name in the table ([#39](https://github.com/allixsenos/asu/issues/39)) ([20606af](https://github.com/allixsenos/asu/commit/20606afce3462108d44d873c9101374338879b1b))
+
 ## [0.9.0](https://github.com/allixsenos/asu/compare/v0.8.0...v0.9.0) (2026-09-10)
 
 
