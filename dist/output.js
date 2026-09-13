@@ -136,19 +136,24 @@ function buildTable(report, options) {
     }
     const border = (left, middle, right) => left + widths.map(w => '─'.repeat(w + 2)).join(middle) + right;
     const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`, border('┌', '┬', '┐')];
-    function row(cells) {
-        const wrappedCells = cells.map((cell, i) => wrap(cell, widths[i]));
+    const fit = (cell, i) => {
+        const out = wrap(cell, widths[i]);
         // Intentional line breaks inside a cell are not wrapping. Extra lines beyond them are.
-        if (wrappedCells.some((cell, i) => cell.length > cells[i].split('\n').length))
+        if (out.length > cell.split('\n').length)
             wrapped = true;
+        return out;
+    };
+    /** The physical lines of one logical row: every column wrapped, then padded to the tallest. */
+    function block(cells) {
+        const wrappedCells = cells.map(fit);
         const height = Math.max(...wrappedCells.map(cell => cell.length));
-        for (let line = 0; line < height; line++)
-            lines.push('│ ' + wrappedCells.map((cell, i) => {
-                const value = cell[line] ?? '';
-                return value + ' '.repeat(widths[i] - textWidth(value));
-            }).join(' │ ') + ' │');
+        return Array.from({ length: height }, (_, line) => wrappedCells.map(cell => cell[line] ?? ''));
     }
-    row(['Provider', 'Plan / status', 'Window / balance', 'Usage', options.utc ? 'Resets (UTC)' : 'Resets in']);
+    const emit = (grid) => {
+        for (const cells of grid)
+            lines.push('│ ' + cells.map((value, i) => value + ' '.repeat(widths[i] - textWidth(value))).join(' │ ') + ' │');
+    };
+    emit(block(['Provider', 'Plan', 'Window / balance', 'Usage', options.utc ? 'Resets (UTC)' : 'Resets in']));
     for (const provider of report.providers) {
         lines.push(border('├', '┼', '┤'));
         const timeCell = (text) => text.replace(/^in /, '').replace(/^\w/, char => char.toUpperCase());
@@ -163,8 +168,14 @@ function buildTable(report, options) {
             rows.push(['Reason', provider.reason.code, '—']);
         if (!rows.length)
             rows.push(['—', '—', '—']);
-        rows.forEach((cells, index) => row([index ? '' : provider.displayName + (provider.experimental ? ' *' : ''),
-            index ? '' : [provider.planLabel, status(provider), provider.cached ? 'cached' : 'fresh'].filter(Boolean).join('\n'), ...cells]));
+        const grid = rows.flatMap((cells, index) => block(['', index ? '' : provider.planLabel ?? '', ...cells]));
+        // The provider cell flows down beside the rows instead of making the first row taller.
+        const freshness = provider.availability === 'available' ? (provider.cached ? 'cached' : 'fresh') : null;
+        const name = fit([provider.displayName + (provider.experimental ? ' *' : ''), status(provider), freshness].filter(Boolean).join('\n'), 0);
+        while (grid.length < name.length)
+            grid.push(['', '', '', '', '']);
+        name.forEach((text, line) => { grid[line][0] = text; });
+        emit(grid);
     }
     lines.push(border('└', '┴', '┘'));
     if (!report.providers.length)
