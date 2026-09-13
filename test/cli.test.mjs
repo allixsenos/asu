@@ -114,6 +114,22 @@ test('bars draw one severity-colored bar per window with a countdown and local c
   assert.equal(barsOverflow(report, { now, columns: 40 }), true);
   assert.equal(barsOverflow(report, { now, columns: 60 }), false);
 });
+test('table stacks name, status, and freshness in the provider column beside the rows', () => {
+  const now = Date.parse('2026-09-07T13:30:00.000Z');
+  const table = renderTable(report, { now });
+  assert.ok(table.includes('│ Provider         │ Plan               │'));
+  assert.match(table, /^│ Example\s+│ Pro\s+│ 5 hours\s+│/m);
+  assert.match(table, /^│ active\s+│\s+│ Weekly\s+│/m);
+  assert.match(table, /^│ fresh\s+│\s+│ Monthly\s+│/m);
+  // A provider with fewer rows than name lines pads, and shows no freshness when it is not active.
+  const missing = { code: 'missing_credentials', message: 'No supported local credentials found. Sign in using the provider CLI.' };
+  const gone = { ...report, providers: [{ ...report.providers[0], availability: 'unavailable', authenticated: false, credentialsPresent: false,
+    installed: false, reason: missing, planLabel: null, windows: [], balances: [], details: [] }] };
+  const lonely = renderTable(gone, { now });
+  assert.match(lonely, /^│ Example\s+│\s+│ Reason\s+│ missing_credentials\s+│/m);
+  assert.match(lonely, /^│ not installed\s+│\s+│\s+│\s+│\s+│$/m);
+  assert.ok(!/│ (fresh|cached)\s/.test(lonely));
+});
 test('table wraps rather than dropping values in narrow terminals', () => {
   const table = renderTable(report, { columns: 60 });
   const grid = table.split('\n').filter(line => /^[┌│├└]/.test(line));

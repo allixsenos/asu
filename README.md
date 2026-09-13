@@ -101,27 +101,22 @@ Use `--table` for this view. When a cell would wrap, the default falls back to p
 ```text
 ASU 0.7.0 · 2026-09-10T07:08:14.046Z
 ┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
-│ Provider         │ Plan / status      │ Window / balance      │ Usage                 │ Resets (UTC)       │
+│ Provider         │ Plan               │ Window / balance      │ Usage                 │ Resets (UTC)       │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
 │ Claude           │ Max 20x            │ 5 hours               │ 18% used              │ 2026-09-10 09:30   │
-│                  │ active             │                       │                       │                    │
-│                  │ fresh              │                       │                       │                    │
-│                  │                    │ Weekly                │ 24% used              │ 2026-09-15 05:00   │
-│                  │                    │ Weekly · Fable        │ 18% used              │ 2026-09-15 05:00   │
+│ active           │                    │ Weekly                │ 24% used              │ 2026-09-15 05:00   │
+│ fresh            │                    │ Weekly · Fable        │ 18% used              │ 2026-09-15 05:00   │
 │                  │                    │ Extra usage           │ Disabled              │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
 │ Codex            │ Plus               │ 5 hours               │ 0% used               │ 2026-09-10 12:08   │
-│                  │ active             │                       │                       │                    │
-│                  │ fresh              │                       │                       │                    │
-│                  │                    │ Weekly                │ 0% used               │ 2026-09-17 07:08   │
-│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 2026-09-17 07:08   │
+│ active           │                    │ Weekly                │ 0% used               │ 2026-09-17 07:08   │
+│ fresh            │                    │ Gpt Reserve · Weekly  │ 0% used               │ 2026-09-17 07:08   │
 │                  │                    │ Credits               │ 0 credits left        │ —                  │
 │                  │                    │ Credits available     │ No                    │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
 │ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 2026-10-01 00:00   │
-│                  │ active             │                       │ 0 / 200 requests      │                    │
-│                  │ fresh              │                       │                       │                    │
-│                  │                    │ Completions           │ 0% used               │ 2026-10-01 00:00   │
+│ active           │                    │                       │ 0 / 200 requests      │                    │
+│ fresh            │                    │ Completions           │ 0% used               │ 2026-10-01 00:00   │
 │                  │                    │                       │ 0 / 2,000 requests    │                    │
 │                  │                    │ Premium Interactions  │ 100% used             │ 2026-10-01 00:00   │
 │                  │                    │                       │ 0 / 0 requests        │                    │
