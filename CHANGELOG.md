@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/allixsenos/asu/compare/v0.10.0...v0.11.0) (2026-09-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* report every subscription login as its own account ([#43](https://github.com/allixsenos/asu/issues/43))
+
+### Features
+
+* read Claude and Codex accounts from ccswap ([#44](https://github.com/allixsenos/asu/issues/44)) ([426cf77](https://github.com/allixsenos/asu/commit/426cf77c6e320d79925c2b3f24d0c6f338ffc6dc))
+* report every subscription login as its own account ([#43](https://github.com/allixsenos/asu/issues/43)) ([95384fc](https://github.com/allixsenos/asu/commit/95384fc21018b3582e856c4785f62b55d7faf100))
+
 ## [0.10.0](https://github.com/allixsenos/asu/compare/v0.9.0...v0.10.0) (2026-09-13)
 
 
