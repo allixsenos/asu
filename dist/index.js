@@ -1,5 +1,6 @@
 export { maskEmail } from './accounts.js';
 export { opencodeSource } from './sources/opencode.js';
+export { ccswapSource } from './sources/ccswap.js';
 export { usageDataSchema, providerUsageSchema, reportSchema, accountSchema, emptyUsage } from './models.js';
 export { UsageError } from './errors.js';
 export { UsageService } from './service.js';

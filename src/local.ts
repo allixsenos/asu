@@ -13,7 +13,8 @@ export interface LocalContext {
   platform: NodeJS.Platform;
   readText(path: string): Promise<string | null>;
   readJson(path: string): Promise<unknown | null>;
-  keychain(service: string, validate?: (value: string) => boolean): Promise<string | null>;
+  /** A macOS Keychain generic password. With `account`, only that exact item is read, with no service-only fallback. */
+  keychain(service: string, validate?: (value: string) => boolean, account?: string): Promise<string | null>;
   sqliteToken(path: string, key: string): Promise<string | null>;
 }
 export async function readText(path: string): Promise<string | null> {
@@ -37,8 +38,8 @@ export async function readText(path: string): Promise<string | null> {
   } finally { await file?.close(); }
 }
 export async function readKeychainEntry(service: string, account: string | undefined,
-  run: (args: string[]) => Promise<string>, validate = (_value: string) => true): Promise<string | null> {
-  for (const args of [...(account ? [['-a', account]] : []), []]) {
+  run: (args: string[]) => Promise<string>, validate = (_value: string) => true, fallback = true): Promise<string | null> {
+  for (const args of [...(account ? [['-a', account]] : []), ...(fallback || !account ? [[]] : [])]) {
     try {
       const raw = (await run(['find-generic-password', '-s', service, ...args, '-w'])).trim();
       if (raw && validate(raw)) return raw;
@@ -46,14 +47,16 @@ export async function readKeychainEntry(service: string, account: string | undef
   }
   return null;
 }
-async function keychain(service: string, validate?: (value: string) => boolean): Promise<string | null> {
+async function keychain(service: string, validate?: (value: string) => boolean, exact?: string): Promise<string | null> {
   if (process.platform !== 'darwin') return null;
-  let account: string | undefined;
-  try { account = userInfo().username; } catch { /* Try legacy lookup below. */ }
-  return readKeychainEntry(service, account, async args => {
+  const run = async (args: string[]) => {
     const { stdout } = await exec('/usr/bin/security', args, { timeout: 2_000, maxBuffer: 1_048_576 });
     return stdout;
-  }, validate);
+  };
+  if (exact) return readKeychainEntry(service, exact, run, validate, false);
+  let account: string | undefined;
+  try { account = userInfo().username; } catch { /* Try legacy lookup below. */ }
+  return readKeychainEntry(service, account, run, validate);
 }
 async function sqliteToken(path: string, key: string): Promise<string | null> {
   try { await access(path); } catch { return null; }

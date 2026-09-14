@@ -34,8 +34,8 @@ export async function readText(path) {
         await file?.close();
     }
 }
-export async function readKeychainEntry(service, account, run, validate = (_value) => true) {
-    for (const args of [...(account ? [['-a', account]] : []), []]) {
+export async function readKeychainEntry(service, account, run, validate = (_value) => true, fallback = true) {
+    for (const args of [...(account ? [['-a', account]] : []), ...(fallback || !account ? [[]] : [])]) {
         try {
             const raw = (await run(['find-generic-password', '-s', service, ...args, '-w'])).trim();
             if (raw && validate(raw))
@@ -45,18 +45,21 @@ export async function readKeychainEntry(service, account, run, validate = (_valu
     }
     return null;
 }
-async function keychain(service, validate) {
+async function keychain(service, validate, exact) {
     if (process.platform !== 'darwin')
         return null;
+    const run = async (args) => {
+        const { stdout } = await exec('/usr/bin/security', args, { timeout: 2_000, maxBuffer: 1_048_576 });
+        return stdout;
+    };
+    if (exact)
+        return readKeychainEntry(service, exact, run, validate, false);
     let account;
     try {
         account = userInfo().username;
     }
     catch { /* Try legacy lookup below. */ }
-    return readKeychainEntry(service, account, async (args) => {
-        const { stdout } = await exec('/usr/bin/security', args, { timeout: 2_000, maxBuffer: 1_048_576 });
-        return stdout;
-    }, validate);
+    return readKeychainEntry(service, account, run, validate);
 }
 async function sqliteToken(path, key) {
     try {
