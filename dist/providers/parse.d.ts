@@ -14,3 +14,5 @@ export declare function ratio(used: unknown, limit: unknown): number | null;
 export declare function countWindow(id: string, label: string, raw: Obj, reset: unknown, unit?: string): UsageWindow;
 export declare function requireUsage(data: UsageData): UsageData;
 export declare function credentialObject(value: unknown): Obj;
+/** A JWT payload, decoded without verification. Use it to label an account, never to trust one. */
+export declare function jwtClaims(value: unknown): Obj | null;

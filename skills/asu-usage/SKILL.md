@@ -46,16 +46,19 @@ Check the setup with `npx --yes @allixsenos/asu@latest --version` and then `npx 
 
 Provider names: `claude`, `codex`, `copilot`, `cursor`, `zai`, `grok`, `kimi`, `minimax`. Useful flags: `--json`, `--table`, `--plain`, `--fresh` (bypass cache), `--utc`, `--all`.
 
-JSON shape (`schemaVersion: 1`), for one provider:
+JSON shape (`schemaVersion: 2`). A provider appears once per account, so select entries by `providerId`:
 
 ```
-providers[0].availability              "available" carries usage; anything else has a reason
-providers[0].planLabel                 e.g. "Max 20x"
-providers[0].windows[]  .id            e.g. five_hour | seven_day | weekly-model-<name>
-                        .label         "5 hours" | "Weekly" | "Weekly · Fable"
-                        .percentUsed   number or null; Claude reports whole numbers, others can report fractions
-                        .resetsAt      ISO timestamp, whole seconds, or null
-providers[0].cached, .expiresAt        readings cache ~5 minutes
+providers[].providerId                 claude | codex | copilot | ...
+providers[].account.label              masked, for example "j***@e***.org"; null when the login has no identity
+providers[].account.sources[]          { name: "Claude Code" | "opencode" | ..., inUse: true when that tool uses it now }
+providers[].availability               "available" carries usage; anything else has a reason, such as token_expired
+providers[].planLabel                  e.g. "Max 20x"
+providers[].windows[]  .id             e.g. five_hour | seven_day | weekly-model-<name>
+                       .label          "5 hours" | "Weekly" | "Weekly · Fable"
+                       .percentUsed    number or null; Claude reports whole numbers, others can report fractions
+                       .resetsAt       ISO timestamp, whole seconds, or null
+providers[].cached, .expiresAt         readings cache ~5 minutes
 ```
 
 ## Rules that matter

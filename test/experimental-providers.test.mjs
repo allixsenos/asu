@@ -80,10 +80,13 @@ test('Kimi normalizes numeric strings and arbitrary duration windows', () => {
   assert.equal(result.windows[2].percentUsed, 10);
 });
 test('Kimi reads configured home and expiry without retaining refresh tokens', async () => {
+  const paths = [];
   const result = await kimi.resolveCredentials(context({ env: { KIMI_CODE_HOME: '/configured' }, readJson: async path => {
-    assert.equal(path, '/configured/credentials/kimi-code.json');
-    return { access_token: 'secret', refresh_token: 'never-used', expires_at: 1700000000 };
+    paths.push(path);
+    return path === '/configured/credentials/kimi-code.json' ? { access_token: 'secret', refresh_token: 'never-used', expires_at: 1700000000 } : null;
   } }));
+  // The configured home is read first. The legacy ~/.kimi home is read too, since it can hold another login.
+  assert.deepEqual(paths, ['/configured/credentials/kimi-code.json', '/fake/.kimi/credentials/kimi-code.json']);
   assert.equal(result.expiresAt, 1700000000000);
   assert.equal(result.refreshToken, undefined);
 });

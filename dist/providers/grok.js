@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { detectCommands } from '../local.js';
 import { emptyUsage } from '../models.js';
+import { firstCredentials } from './base.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, ratio, requireUsage, string, timestamp } from './parse.js';
 function cents(raw) {
     if (raw == null)
@@ -31,25 +32,30 @@ export function normalizeGrok(payload) {
 export const grok = {
     id: 'grok', displayName: 'Grok', version: 1, experimental: true,
     detect: context => detectCommands(context, ['grok']),
-    async resolveCredentials(context) {
-        const token = string(context.env.GROK_API_KEY) ?? string(context.env.GROK_TOKEN);
-        if (token)
-            return { token };
+    async listLogins(context) {
+        const logins = [];
+        for (const name of ['GROK_API_KEY', 'GROK_TOKEN']) {
+            const token = string(context.env[name]);
+            if (token)
+                logins.push({ credentials: { token }, source: name });
+        }
         const raw = await context.readJson(join(context.home, '.grok', 'auth.json'));
         if (raw == null)
-            return null;
+            return logins;
         const auth = credentialObject(raw), legacy = string(auth.access_token);
+        const cli = (token) => logins.push({ credentials: { token }, source: 'Grok CLI', inUse: !logins.some(login => login.source === 'Grok CLI') });
         if (legacy)
-            return { token: legacy };
+            cli(legacy);
         for (const [key, value] of Object.entries(auth)) {
             if (!key.startsWith('https://auth.x.ai::'))
                 continue;
             const token = string(credentialObject(value).key);
             if (token)
-                return { token };
+                cli(token);
         }
-        return null;
+        return logins;
     },
+    resolveCredentials: context => firstCredentials(grok.listLogins(context)),
     async fetchUsage(context, credentials) {
         return normalizeGrok(await context.request('https://cli-chat-proxy.grok.com/v1/billing?format=credits', {
             signal: context.signal, headers: { Authorization: `Bearer ${credentials.token}`, 'X-XAI-Token-Auth': 'xai-grok-cli' },

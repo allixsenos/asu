@@ -9,7 +9,10 @@ import { zai } from './providers/zai.js';
 import { grok } from './providers/grok.js';
 import { kimi } from './providers/kimi.js';
 import { minimax } from './providers/minimax.js';
+import { opencodeSource } from './sources/opencode.js';
 export const builtInProviders = [claude, codex, copilot, cursor, zai, grok, kimi, minimax];
+/** Credential stores shared by several tools. Each one is read on every run, next to the providers' own stores. */
+export const builtInSources = [opencodeSource];
 export function validateProvider(value) {
     if (!value || typeof value !== 'object')
         throw new Error('Invalid provider plugin');
@@ -17,7 +20,8 @@ export function validateProvider(value) {
     if (typeof p.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,47}$/.test(p.id)
         || typeof p.displayName !== 'string' || !/^[\p{L}\p{N} ._-]{1,80}$/u.test(p.displayName)
         || !Number.isSafeInteger(p.version) || (p.version ?? 0) < 1
-        || typeof p.detect !== 'function' || typeof p.resolveCredentials !== 'function' || typeof p.fetchUsage !== 'function'
+        || typeof p.detect !== 'function' || typeof p.fetchUsage !== 'function'
+        || (typeof p.listLogins !== 'function' && typeof p.resolveCredentials !== 'function')
         || (p.experimental !== undefined && typeof p.experimental !== 'boolean'))
         throw new Error('Invalid provider plugin');
     return value;

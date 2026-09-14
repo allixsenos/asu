@@ -3,7 +3,8 @@ import { UsageError } from '../errors.js';
 import { detectCommands } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
-import type { Credentials, Provider } from './base.js';
+import type { Credentials, Login, Provider } from './base.js';
+import { firstCredentials } from './base.js';
 import { credentialObject, list, nonnegative, object, optionalObject, percent, ratio, requireUsage, slug, string, timestamp } from './parse.js';
 
 function baseUrl(value: string | undefined, region?: string): string {
@@ -16,7 +17,8 @@ function baseUrl(value: string | undefined, region?: string): string {
   } catch { /* Never forward a subscription key to an arbitrary configured host. */ }
   throw new UsageError('invalid_credentials');
 }
-function auth(token: string, url: string | undefined, region?: string, expiry?: unknown): Credentials {
+/** MiniMax credentials pinned to a recognized host. Exported for the opencode source. */
+export function auth(token: string, url: string | undefined, region?: string, expiry?: unknown): Credentials {
   const expiresAt = timestamp(expiry);
   return { token, metadata: { baseUrl: baseUrl(url, region) }, expiresAt: expiresAt ? Date.parse(expiresAt) : undefined };
 }
@@ -41,21 +43,26 @@ export function normalizeMiniMax(payload: unknown): UsageData {
 export const minimax: Provider = {
   id: 'minimax', displayName: 'MiniMax', version: 1, experimental: true,
   detect: context => detectCommands(context, ['mmx', 'minimax']),
-  async resolveCredentials(context) {
+  async listLogins(context) {
+    const logins: Login[] = [];
     const token = string(context.env.MINIMAX_API_KEY);
-    if (token) return auth(token, string(context.env.MINIMAX_BASE_URL), string(context.env.MINIMAX_REGION));
+    if (token) logins.push({ credentials: auth(token, string(context.env.MINIMAX_BASE_URL), string(context.env.MINIMAX_REGION)), source: 'MINIMAX_API_KEY' });
+    const cli = (credentials: Credentials) => logins.push({ credentials, source: 'MiniMax CLI', inUse: !logins.some(login => login.source === 'MiniMax CLI') });
     const raw = await context.readJson(join(context.home, '.mmx', 'credentials.json'));
     if (raw != null) {
-      const credentials = credentialObject(raw), token = string(credentials.access_token);
-      if (token) return auth(token, string(credentials.resource_url), undefined, credentials.expires_at);
+      const credentials = credentialObject(raw), access = string(credentials.access_token);
+      if (access) cli(auth(access, string(credentials.resource_url), undefined, credentials.expires_at));
     }
     const configRaw = await context.readJson(join(context.home, '.mmx', 'config.json'));
-    if (configRaw == null) return null;
-    const config = credentialObject(configRaw), apiKey = string(config.api_key);
-    if (apiKey) return auth(apiKey, string(config.base_url), string(config.region));
-    const oauth = config.oauth == null ? {} : credentialObject(config.oauth), accessToken = string(oauth.access_token);
-    return accessToken ? auth(accessToken, string(oauth.resource_url) ?? string(config.base_url), string(config.region), oauth.expires_at) : null;
+    if (configRaw != null) {
+      const config = credentialObject(configRaw), apiKey = string(config.api_key);
+      if (apiKey) cli(auth(apiKey, string(config.base_url), string(config.region)));
+      const oauth = config.oauth == null ? {} : credentialObject(config.oauth), accessToken = string(oauth.access_token);
+      if (accessToken) cli(auth(accessToken, string(oauth.resource_url) ?? string(config.base_url), string(config.region), oauth.expires_at));
+    }
+    return logins;
   },
+  resolveCredentials: context => firstCredentials(minimax.listLogins!(context)),
   async fetchUsage(context, credentials) {
     return normalizeMiniMax(await context.request(`${credentials.metadata?.baseUrl ?? 'https://api.minimax.io'}/v1/token_plan/remains`, {
       signal: context.signal, headers: { Authorization: `Bearer ${credentials.token}`, 'Content-Type': 'application/json' },

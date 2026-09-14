@@ -76,4 +76,17 @@ export function credentialObject(value) {
         throw new UsageError('invalid_credentials');
     }
 }
+/** A JWT payload, decoded without verification. Use it to label an account, never to trust one. */
+export function jwtClaims(value) {
+    const part = typeof value === 'string' ? value.split('.')[1] : undefined;
+    if (!part)
+        return null;
+    try {
+        const claims = JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
+        return claims && typeof claims === 'object' && !Array.isArray(claims) ? claims : null;
+    }
+    catch {
+        return null;
+    }
+}
 //# sourceMappingURL=parse.js.map

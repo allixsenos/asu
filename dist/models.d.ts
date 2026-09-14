@@ -53,7 +53,20 @@ export declare const usageDataSchema: z.ZodObject<{
         value: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
-export declare const reasonCodes: readonly ['missing_credentials', 'invalid_credentials', 'credential_read_error', 'unauthorized', 'timeout', 'rate_limited', 'http_error', 'invalid_response', 'provider_error'];
+export declare const reasonCodes: readonly ['missing_credentials', 'invalid_credentials', 'credential_read_error', 'token_expired', 'unauthorized', 'timeout', 'rate_limited', 'http_error', 'invalid_response', 'provider_error'];
+/**
+ * One subscription login. `label` is masked unless the caller asked for emails.
+ * `email` appears only with --show-email, and never in the cache.
+ */
+export declare const accountSchema: z.ZodObject<{
+    id: z.ZodString;
+    label: z.ZodNullable<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+    email: z.ZodOptional<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+    sources: z.ZodArray<z.ZodObject<{
+        name: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
+        inUse: z.ZodBoolean;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
 export declare const providerUsageSchema: z.ZodObject<{
     planLabel: z.ZodNullable<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
     windows: z.ZodArray<z.ZodObject<{
@@ -104,16 +117,26 @@ export declare const providerUsageSchema: z.ZodObject<{
             provider_error: "provider_error";
             rate_limited: "rate_limited";
             timeout: "timeout";
+            token_expired: "token_expired";
             unauthorized: "unauthorized";
         }>;
         message: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
+    }, z.core.$strip>>;
+    account: z.ZodNullable<z.ZodObject<{
+        id: z.ZodString;
+        label: z.ZodNullable<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+        email: z.ZodOptional<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+        sources: z.ZodArray<z.ZodObject<{
+            name: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
+            inUse: z.ZodBoolean;
+        }, z.core.$strip>>;
     }, z.core.$strip>>;
     fetchedAt: z.ZodISODateTime;
     expiresAt: z.ZodISODateTime;
     cached: z.ZodBoolean;
 }, z.core.$strip>;
 export declare const reportSchema: z.ZodObject<{
-    schemaVersion: z.ZodLiteral<1>;
+    schemaVersion: z.ZodLiteral<2>;
     asuVersion: z.ZodString;
     generatedAt: z.ZodISODateTime;
     warnings: z.ZodArray<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
@@ -167,9 +190,19 @@ export declare const reportSchema: z.ZodObject<{
                 provider_error: "provider_error";
                 rate_limited: "rate_limited";
                 timeout: "timeout";
+                token_expired: "token_expired";
                 unauthorized: "unauthorized";
             }>;
             message: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
+        }, z.core.$strip>>;
+        account: z.ZodNullable<z.ZodObject<{
+            id: z.ZodString;
+            label: z.ZodNullable<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+            email: z.ZodOptional<z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>>;
+            sources: z.ZodArray<z.ZodObject<{
+                name: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
+                inUse: z.ZodBoolean;
+            }, z.core.$strip>>;
         }, z.core.$strip>>;
         fetchedAt: z.ZodISODateTime;
         expiresAt: z.ZodISODateTime;
@@ -179,6 +212,7 @@ export declare const reportSchema: z.ZodObject<{
 export type UsageWindow = z.infer<typeof windowSchema>;
 export type Balance = z.infer<typeof balanceSchema>;
 export type UsageData = z.infer<typeof usageDataSchema>;
+export type Account = z.infer<typeof accountSchema>;
 export type ProviderUsage = z.infer<typeof providerUsageSchema>;
 export type UsageReport = z.infer<typeof reportSchema>;
 export type ReasonCode = typeof reasonCodes[number];
