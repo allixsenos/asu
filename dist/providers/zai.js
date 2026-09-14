@@ -1,5 +1,6 @@
 import { UsageError } from '../errors.js';
 import { emptyUsage } from '../models.js';
+import { firstCredentials } from './base.js';
 import { list, nonnegative, object, percent, requireUsage, slug, string, timestamp } from './parse.js';
 function envelope(payload) {
     const raw = object(payload);
@@ -39,10 +40,16 @@ export const zai = {
     id: 'zai', displayName: 'Z.ai', version: 1, experimental: true,
     // A subscription provider used through other CLIs; no distinct installation to prove.
     detect: async () => null,
-    async resolveCredentials(context) {
-        const token = string(context.env.ZAI_API_KEY) ?? string(context.env.GLM_API_KEY);
-        return token ? { token } : null;
+    async listLogins(context) {
+        const logins = [];
+        for (const name of ['ZAI_API_KEY', 'GLM_API_KEY']) {
+            const token = string(context.env[name]);
+            if (token)
+                logins.push({ credentials: { token }, source: name });
+        }
+        return logins;
     },
+    resolveCredentials: context => firstCredentials(zai.listLogins(context)),
     async fetchUsage(context, credentials) {
         const [plan, quota] = await Promise.allSettled([
             context.request('https://api.z.ai/api/biz/subscription/list', {

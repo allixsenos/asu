@@ -21,6 +21,7 @@ You get an acknowledgement within 7 days. A fix for a confirmed issue ships as a
 - A cache file or directory readable by another user on the machine.
 - A provider plugin loaded from anywhere but the path or package the user named on the command line.
 - Anything that writes to, refreshes, or deletes a provider's credential store.
+- An unmasked email in output without `--show-email`, or in the cache, a log, or an error message at any time.
 
 ## What does not count
 
@@ -34,4 +35,4 @@ Only the newest release on npm receives fixes. `npx --yes @allixsenos/asu@latest
 
 ## How ASU limits exposure
 
-ASU reads credentials and never logs them. Every request goes over HTTPS to a fixed provider host, and ASU refuses redirects. Before it caches a report, ASU validates it, strips terminal control characters, and redacts any echo of a token or account ID. ASU creates cache files with mode 600 in a directory with mode 700.
+ASU reads credentials and never logs them. It masks every email it shows. A full email appears only with `--show-email`, in that run's output, and never in the cache. Every request goes over HTTPS to a fixed provider host, and ASU refuses redirects. Before it caches a report, ASU validates it, strips terminal control characters, and redacts any echo of a token or account ID. ASU creates cache files with mode 600 in a directory with mode 700.

@@ -33,8 +33,18 @@ export const usageDataSchema = z.object({
   balances: z.array(balanceSchema).max(100),
   details: z.array(z.object({ label: displayText, value: displayText })).max(100),
 });
-export const reasonCodes = ['missing_credentials', 'invalid_credentials', 'credential_read_error',
+export const reasonCodes = ['missing_credentials', 'invalid_credentials', 'credential_read_error', 'token_expired',
   'unauthorized', 'timeout', 'rate_limited', 'http_error', 'invalid_response', 'provider_error'] as const;
+/**
+ * One subscription login. `label` is masked unless the caller asked for emails.
+ * `email` appears only with --show-email, and never in the cache.
+ */
+export const accountSchema = z.object({
+  id: z.string().regex(/^[a-z0-9][a-z0-9._-]{0,127}:[a-f0-9]{8}$/),
+  label: displayText.nullable(),
+  email: displayText.optional(),
+  sources: z.array(z.object({ name: displayText, inUse: z.boolean() })).max(20),
+});
 export const providerUsageSchema = usageDataSchema.extend({
   providerId: id,
   displayName: displayText,
@@ -44,13 +54,16 @@ export const providerUsageSchema = usageDataSchema.extend({
   authenticated: z.boolean().nullable(),
   availability: z.enum(['available', 'unavailable', 'error']),
   reason: z.object({ code: z.enum(reasonCodes), message: displayText }).nullable(),
+  /** Null when no login was found. Several results can share a `providerId`, one per account. */
+  account: accountSchema.nullable(),
   fetchedAt: timestamp,
   expiresAt: timestamp,
   cached: z.boolean(),
 });
 export const reportSchema = z.object({
-  schemaVersion: z.literal(1),
-  /** The ASU package version that wrote the report. Additive; the schema version stays 1. */
+  /** Version 2 adds `account`, and one provider can appear once per account. */
+  schemaVersion: z.literal(2),
+  /** The ASU package version that wrote the report. */
   asuVersion: z.string(),
   generatedAt: timestamp,
   warnings: z.array(displayText),
@@ -59,6 +72,7 @@ export const reportSchema = z.object({
 export type UsageWindow = z.infer<typeof windowSchema>;
 export type Balance = z.infer<typeof balanceSchema>;
 export type UsageData = z.infer<typeof usageDataSchema>;
+export type Account = z.infer<typeof accountSchema>;
 export type ProviderUsage = z.infer<typeof providerUsageSchema>;
 export type UsageReport = z.infer<typeof reportSchema>;
 export type ReasonCode = typeof reasonCodes[number];

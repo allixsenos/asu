@@ -37,25 +37,30 @@ def snapshot(provider):
     if start < 0:
         raise SystemExit(f'asu produced no JSON: {r.stdout.strip()[:300]}')
     data = json.loads(r.stdout[start:])
-    if data.get('schemaVersion') != 1:
+    if data.get('schemaVersion') != 2:
         raise SystemExit(f"asu report schemaVersion {data.get('schemaVersion')} is not supported")
     out = {}
     plan = None
+    skipped = []
     for p in data.get('providers', []):
         if provider and p.get('providerId') != provider:
             continue
+        account = p.get('account') or {}
+        name = p.get('displayName', p['providerId']) + (f" {account['label']}" if account.get('label') else '')
         if p.get('availability') != 'available':
+            # One account with an expired token must not stop the measurement of the others.
             reason = p.get('reason') or {}
-            raise SystemExit(f"{p.get('displayName', p.get('providerId'))}: {reason.get('code', p.get('availability'))}. {reason.get('message', '')}".strip())
+            skipped.append(f"{name}: {reason.get('code', p.get('availability'))}")
+            continue
         plan = plan or p.get('planLabel')
         for w in p.get('windows', []):
-            out[f"{p['providerId']}:{w['id']}"] = {
-                'label': f"{p.get('displayName', p['providerId'])} {w.get('label', w['id'])}",
+            out[f"{p['providerId']}:{account.get('id', '-')}:{w['id']}"] = {
+                'label': f"{name} {w.get('label', w['id'])}",
                 'percentUsed': w.get('percentUsed'),
                 'resetsAt': w.get('resetsAt'),
             }
     if not out:
-        raise SystemExit('asu returned no usage windows (signed in?)')
+        raise SystemExit('asu returned no usage windows: ' + ('; '.join(skipped) or 'signed in?'))
     return {'plan': plan, 'at': data.get('generatedAt'), 'windows': out}
 
 
@@ -129,7 +134,7 @@ def main():
         recs = [json.loads(l) for l in open(args.ledger) if l.strip()]
         print(f'{len(recs)} runs in {args.ledger}\n')
         keys = sorted({r['key'] for rec in recs for r in rec['rows']})
-        print(f'{"label":28s} {"min":>6s}  ' + '  '.join(f'{k.split(":")[1]:>10s}' for k in keys))
+        print(f'{"label":28s} {"min":>6s}  ' + '  '.join(f'{k.split(":")[-1]:>10s}' for k in keys))
         for rec in recs:
             by = {r['key']: r for r in rec['rows']}
             cells = []

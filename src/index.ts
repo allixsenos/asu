@@ -1,11 +1,14 @@
-export type { Provider, ProviderContext, Credentials } from './providers/base.js';
-export type { UsageData, ProviderUsage, UsageReport, UsageWindow, Balance } from './models.js';
+export type { Provider, ProviderContext, Credentials, Login, LoginSource } from './providers/base.js';
+export type { UsageData, ProviderUsage, UsageReport, UsageWindow, Balance, Account } from './models.js';
+export type { CollectOptions, ServiceOptions } from './service.js';
+export { maskEmail } from './accounts.js';
+export { opencodeSource } from './sources/opencode.js';
 export type { LocalContext } from './local.js';
 export type { RequestJson, JsonRequest } from './transport.js';
-export { usageDataSchema, providerUsageSchema, reportSchema, emptyUsage } from './models.js';
+export { usageDataSchema, providerUsageSchema, reportSchema, accountSchema, emptyUsage } from './models.js';
 export { UsageError } from './errors.js';
 export { UsageService } from './service.js';
 export { UsageCache } from './cache.js';
 export { createLocalContext } from './local.js';
 export { createTransport } from './transport.js';
-export { builtInProviders, loadProviders } from './registry.js';
+export { builtInProviders, builtInSources, loadProviders } from './registry.js';

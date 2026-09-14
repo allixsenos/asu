@@ -16,15 +16,16 @@ ASU only reads credentials that the provider's own CLI already stored. It never 
 
 ## What to read
 
-Check `schemaVersion` first. This document describes version 1.
+Check `schemaVersion` first. This document describes version 2.
 
 For each entry in `providers`:
 
 - `availability` is `available`, `unavailable`, or `error`. Only `available` carries usage.
+- `account` is the login behind the entry. A provider appears once per account, so select entries by `providerId`, not by position. `account.sources` lists where the login was found, and `inUse: true` on the source named after your tool, such as `Claude Code`, marks the account you run on.
 - `windows` is the list of rate-limit windows. Each has `label`, `percentUsed`, and `resetsAt`. A provider can have any number of windows, in any order. Do not assume a fixed set.
 - `percentUsed` is `null` when the provider did not report it. It can exceed 100 when the provider reports overage.
 - `resetsAt` is a UTC timestamp or `null`. Time until reset is `resetsAt` minus now. Providers compute it relative to each request, so the value can jitter by a second or more between calls, and an idle Codex window moves with the clock. Treat a change of less than a few minutes as the same reset. A real reset moves it forward by a whole window.
-- `reason.code` explains an unavailable or failed provider: `missing_credentials`, `invalid_credentials`, `unauthorized`, `timeout`, `rate_limited`, `http_error`, `invalid_response`, or `provider_error`.
+- `reason.code` explains an unavailable or failed provider: `missing_credentials`, `invalid_credentials`, `token_expired`, `unauthorized`, `timeout`, `rate_limited`, `http_error`, `invalid_response`, or `provider_error`.
 - `cached` is true when the figures come from ASU's five-minute cache. `fetchedAt` is the time of that fetch.
 
 ## Recipes
@@ -33,14 +34,14 @@ Highest usage across all windows of one provider:
 
 ```bash
 npx --yes @allixsenos/asu@latest claude --json \
-  | jq '[.providers[0].windows[].percentUsed | select(. != null)] | max'
+  | jq '[.providers[] | select(.providerId == "claude") | .windows[].percentUsed | select(. != null)] | max'
 ```
 
 Minutes until the most constrained window resets:
 
 ```bash
 npx --yes @allixsenos/asu@latest claude --json \
-  | jq -r '.providers[0].windows | max_by(.percentUsed // 0) | .resetsAt' \
+  | jq -r '[.providers[] | select(.providerId == "claude") | .windows[]] | max_by(.percentUsed // 0) | .resetsAt' \
   | xargs -I{} node -e 'console.log(Math.round((Date.parse("{}") - Date.now()) / 60000))'
 ```
 
@@ -64,7 +65,7 @@ npx --yes @allixsenos/asu@latest --json | jq '[.providers[]
 
 ```markdown
 Before a long task, run `npx --yes @allixsenos/asu@latest claude --json` and read the highest
-`percentUsed` in `providers[0].windows`. Continue below 70. Between 70 and 90 use smaller
+`percentUsed` in the `claude` entries of `providers`. Continue below 70. Between 70 and 90 use smaller
 steps. At 90 or above, stop, and tell the user the figure and the `resetsAt` time.
 Do not run it more than once per five minutes.
 ```

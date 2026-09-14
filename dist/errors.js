@@ -2,6 +2,7 @@ const messages = {
     missing_credentials: 'No supported local credentials found. Sign in using the provider CLI.',
     invalid_credentials: 'Local credentials are malformed or expired. Sign in using the provider CLI.',
     credential_read_error: 'Could not read the local credential store. Check its permissions and format.',
+    token_expired: 'The stored token has expired. ASU never refreshes tokens. The tool that owns this login refreshes it.',
     unauthorized: 'The provider rejected these credentials. Sign in using the provider CLI.',
     timeout: 'The provider did not respond before the deadline.',
     rate_limited: 'The provider is rate limiting usage requests. Try again after the cache expires.',

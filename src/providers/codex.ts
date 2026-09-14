@@ -2,8 +2,9 @@ import { join } from 'node:path';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
-import type { Provider } from './base.js';
-import { credentialObject, list, nonnegative, number, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
+import type { Login, Provider } from './base.js';
+import { firstCredentials } from './base.js';
+import { credentialObject, jwtClaims, list, nonnegative, number, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 
 export function normalizeCodex(payload: unknown, now = Date.now()): UsageData {
   const raw = object(payload), data = emptyUsage();
@@ -38,21 +39,27 @@ export function normalizeCodex(payload: unknown, now = Date.now()): UsageData {
 export const codex: Provider = {
   id: 'codex', displayName: 'Codex', version: 1,
   detect: context => detectCommands(context, ['codex']),
-  async resolveCredentials(context) {
+  async listLogins(context) {
     const paths = [
       ...(context.env.CODEX_HOME ? [join(homePath(context, context.env.CODEX_HOME, '.codex'), 'auth.json')] : []),
       join(context.home, '.config', 'codex', 'auth.json'), join(context.home, '.codex', 'auth.json'),
     ];
+    const logins: Login[] = [];
     for (const path of new Set(paths)) {
       const raw = await context.readJson(path);
       if (raw == null) continue;
       const root = credentialObject(raw);
       if (root.tokens == null) continue;
       const tokens = credentialObject(root.tokens), token = string(tokens.access_token);
-      if (token) return { token, accountId: string(tokens.account_id) };
+      if (!token) continue;
+      const accountId = string(tokens.account_id);
+      // The first file found is the one Codex uses. The id_token's email only labels the account.
+      logins.push({ credentials: { token, accountId }, source: 'Codex CLI', inUse: logins.length === 0,
+        accountKey: accountId, email: string(jwtClaims(tokens.id_token)?.email) });
     }
-    return null;
+    return logins;
   },
+  resolveCredentials: context => firstCredentials(codex.listLogins!(context)),
   async fetchUsage(context, credentials) {
     const headers: Record<string, string> = { Authorization: `Bearer ${credentials.token}` };
     if (credentials.accountId) headers['ChatGPT-Account-Id'] = credentials.accountId;

@@ -4,7 +4,9 @@ import { UsageError } from '../errors.js';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
-import type { Credentials, Provider } from './base.js';
+import type { Credentials, Login, Provider } from './base.js';
+import { firstCredentials } from './base.js';
+import type { LocalContext } from '../local.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, requireUsage, slug, string, timestamp, title } from './parse.js';
 
 interface Scope { model?: { id?: string; name: string }; surface?: { id?: string; name: string } }
@@ -96,29 +98,40 @@ function parseCredentials(raw: unknown): Credentials | null {
   }
   return { token, metadata, expiresAt: nonnegative(oauth.expiresAt) };
 }
+/** Claude Code keeps the account identity beside its settings, not with the token. A missing or unreadable file leaves the login unidentified. */
+async function claudeIdentity(context: LocalContext): Promise<Pick<Login, 'accountKey' | 'email'>> {
+  try {
+    const dir = context.env.CLAUDE_CONFIG_DIR;
+    const raw = await context.readJson(dir ? join(homePath(context, dir, '.claude'), '.claude.json') : join(context.home, '.claude.json'));
+    const account = optionalObject(optionalObject(raw).oauthAccount);
+    const uuid = string(account.accountUuid);
+    return { accountKey: uuid ? `${uuid}:${string(account.organizationUuid) ?? ''}` : undefined, email: string(account.emailAddress) };
+  } catch { return {}; }
+}
 export const claude: Provider = {
   id: 'claude', displayName: 'Claude', version: 1,
   detect: context => detectCommands(context, ['claude']),
-  async resolveCredentials(context) {
+  async listLogins(context) {
     let failure: unknown;
+    let credentials: Credentials | null = null;
     try {
       const home = homePath(context, context.env.CLAUDE_CONFIG_DIR || context.env.CLAUDE_HOME, '.claude');
       const raw = await context.readJson(join(home, '.credentials.json'));
-      const credentials = raw == null ? null : parseCredentials(raw);
-      if (credentials) return credentials;
+      credentials = raw == null ? null : parseCredentials(raw);
     } catch (error) { failure = error; }
-    if (context.platform === 'darwin') {
+    if (!credentials && context.platform === 'darwin') {
       const raw = await context.keychain('Claude Code-credentials', value => {
         try { return parseCredentials(JSON.parse(value)) !== null; } catch { return false; }
       });
       if (raw) {
-        try { const credentials = parseCredentials(JSON.parse(raw)); if (credentials) return credentials; }
+        try { credentials = parseCredentials(JSON.parse(raw)); }
         catch { failure = new UsageError('invalid_credentials'); }
       }
     }
-    if (failure) throw failure;
-    return null;
+    if (!credentials) { if (failure) throw failure; return []; }
+    return [{ credentials, source: 'Claude Code', inUse: true, ...await claudeIdentity(context) }];
   },
+  resolveCredentials: context => firstCredentials(claude.listLogins!(context)),
   async fetchUsage(context, credentials) {
     const raw = await context.request('https://api.anthropic.com/api/oauth/usage', {
       signal: context.signal, headers: { Authorization: `Bearer ${credentials.token}`, 'anthropic-beta': 'oauth-2025-04-20' },

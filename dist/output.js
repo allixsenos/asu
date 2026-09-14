@@ -66,14 +66,25 @@ function status(provider) {
         return 'active';
     if (provider.availability === 'error')
         return 'error';
+    if (provider.reason?.code === 'token_expired')
+        return 'token expired';
     if (provider.credentialsPresent)
         return 'not logged in';
     return provider.installed === false ? 'not installed' : 'not logged in';
+}
+/** Where an account's logins were found, for example `Claude Code (in use), opencode`. Null without an account. */
+function via(provider) {
+    return provider.account?.sources.map(source => source.inUse ? `${source.name} (in use)` : source.name).join(', ') || null;
 }
 export function renderPlain(report, options = {}) {
     const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`];
     for (const provider of report.providers) {
         lines.push('', `${provider.displayName} (${provider.providerId})${provider.experimental ? ' [experimental]' : ''}`, `  ${status(provider)}`);
+        if (provider.account?.label)
+            lines.push(`  Account: ${provider.account.label}`);
+        const through = via(provider);
+        if (through)
+            lines.push(`  Via: ${through}`);
         if (provider.planLabel)
             lines.push(`  Plan: ${provider.planLabel}`);
         for (const window of provider.windows)
@@ -171,7 +182,7 @@ function buildTable(report, options) {
         const grid = rows.flatMap((cells, index) => block(['', index ? '' : provider.planLabel ?? '', ...cells]));
         // The provider cell flows down beside the rows instead of making the first row taller.
         const freshness = provider.availability === 'available' ? (provider.cached ? 'cached' : 'fresh') : null;
-        const name = fit([provider.displayName + (provider.experimental ? ' *' : ''), status(provider), freshness].filter(Boolean).join('\n'), 0);
+        const name = fit([provider.displayName + (provider.experimental ? ' *' : ''), provider.account?.label, status(provider), freshness].filter(Boolean).join('\n'), 0);
         while (grid.length < name.length)
             grid.push(['', '', '', '', '']);
         name.forEach((text, line) => { grid[line][0] = text; });
@@ -182,7 +193,8 @@ function buildTable(report, options) {
         lines.push('No supported agents or credentials detected. Use --all to list every provider.');
     // The footer is bookkeeping only. Usage, details, and the reason code are rows in the table.
     for (const provider of report.providers) {
-        lines.push(`${provider.displayName}: fetched ${ago(provider.fetchedAt, options)}; cache expires ${ahead(provider.expiresAt, options)}.`
+        const through = via(provider);
+        lines.push(`${provider.displayName}${provider.account?.label ? ` (${provider.account.label})` : ''}${through ? ` via ${through}` : ''}: fetched ${ago(provider.fetchedAt, options)}; cache expires ${ahead(provider.expiresAt, options)}.`
             + (provider.reason ? ` ${provider.reason.message}` : ''));
     }
     if (report.providers.some(p => p.experimental))
@@ -251,8 +263,11 @@ function buildBarLines(report, options, layout) {
     const lines = [`ASU ${report.asuVersion} · ${report.generatedAt}`];
     for (const provider of report.providers) {
         const freshness = provider.availability === 'available' ? (provider.cached ? 'cached' : 'fresh') : null;
-        lines.push('', sgr(options, '1', [provider.displayName + (provider.experimental ? ' [experimental]' : ''), provider.planLabel, status(provider), freshness]
+        lines.push('', sgr(options, '1', [provider.displayName + (provider.experimental ? ' [experimental]' : ''), provider.account?.label, provider.planLabel, status(provider), freshness]
             .filter(Boolean).join(' · ')));
+        const through = via(provider);
+        if (through)
+            lines.push(sgr(options, '2', `  via ${through}`));
         const labels = [...provider.windows, ...provider.balances, ...provider.details].map(item => item.label);
         const labelWidth = Math.max(0, ...labels.map(textWidth));
         const cell = (label) => sgr(options, '2', label + ' '.repeat(labelWidth - textWidth(label)));

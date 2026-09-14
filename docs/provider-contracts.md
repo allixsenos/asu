@@ -19,7 +19,28 @@ Claude's configured home follows the official [`CLAUDE_CONFIG_DIR` documentation
 
 Codex reads subscription OAuth credentials, not ordinary API keys. The [official authentication documentation](https://developers.openai.com/codex/auth/) describes its file and keyring choices. ASU reads the `auth.json` sources listed in the README. It does not start a login, and it does not read or refresh a session that lives only in the keyring.
 
+## opencode credentials
+
+We checked opencode [v1.18.30](https://github.com/anomalyco/opencode/tree/v1.18.30) on 2026-09-14. opencode writes every provider login to `auth.json` in its data directory. [`packages/core/src/global.ts`](https://github.com/anomalyco/opencode/blob/v1.18.30/packages/core/src/global.ts) takes that directory from `xdg-basedir`, so the path is `$XDG_DATA_HOME/opencode/auth.json`, or `~/.local/share/opencode/auth.json`, on Linux, macOS, and Windows. [`packages/opencode/src/auth/index.ts`](https://github.com/anomalyco/opencode/blob/v1.18.30/packages/opencode/src/auth/index.ts) defines the file as one object keyed by provider ID. An entry is `{ type: "oauth", access, refresh, expires, accountId?, enterpriseUrl? }` or `{ type: "api", key }`, and `expires` is in milliseconds.
+
+ASU reads the file on every run as a source of its own, next to each provider's stores. opencode can use a different subscription than Claude Code or Codex, so its logins are never a fallback. A login merges with another only when both share an account ID or a token.
+
+| opencode key | ASU provider | Field ASU uses |
+| --- | --- | --- |
+| `anthropic` | `claude` | OAuth `access` and `expires`. No identity, so it stays its own account unless the token matches. |
+| `openai` | `codex` | OAuth `access`, `expires`, and `accountId`, which also merges it with a Codex CLI login of the same account |
+| `github-copilot` | `copilot` | `refresh`, which holds the GitHub device-flow token. `expires` is `0`. An entry with `enterpriseUrl` is skipped. |
+| `zai-coding-plan` | `zai` | API `key` |
+| `kimi-for-coding` | `kimi` | API `key` |
+| `minimax-coding-plan`, `minimax-cn-coding-plan` | `minimax` | API `key`. The `cn` entry selects `api.minimaxi.com`. |
+| `xai` | `grok` | OAuth `access` and `expires`, or API `key` |
+
+ASU skips a pay-as-you-go `zai` key, a `moonshotai` platform key, and an `openai` API key, because those have no subscription usage. opencode refreshes OAuth tokens in place. ASU does not, so an expired entry reports `token_expired`.
+
 ## Known limitations
+
+- opencode logins have fixture tests only. No opencode login was available for a live check. Three points are unverified: whether `copilot_internal/user` accepts opencode's `read:user` GitHub token, whether the Grok CLI billing endpoint accepts opencode's `xai` token, and whether an `anthropic` entry matches Claude Code's OAuth client. opencode removed its built-in Anthropic login in 1.3.0, so only older setups or third-party plugins write that entry.
+- opencode v2 moves credentials into a SQLite database. v2 is a tag, not a release, and ASU does not read it yet.
 
 - Only Claude, Codex, and Copilot passed live checks, all on Linux. The other adapters have fixture coverage only. The Keychain and desktop-store paths for macOS and Windows have no live check.
 - Copilot's internal endpoint can return plan-only or legacy quota data. It may not represent every newer AI-credit billing arrangement. A zero entitlement can come with a reported 100% usage value. ASU keeps that percentage and the reported zero quantities. It does not infer the number of consumed requests.

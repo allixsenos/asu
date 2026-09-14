@@ -61,3 +61,12 @@ export function requireUsage(data: UsageData): UsageData {
 export function credentialObject(value: unknown): Obj {
   try { return object(value); } catch { throw new UsageError('invalid_credentials'); }
 }
+/** A JWT payload, decoded without verification. Use it to label an account, never to trust one. */
+export function jwtClaims(value: unknown): Obj | null {
+  const part = typeof value === 'string' ? value.split('.')[1] : undefined;
+  if (!part) return null;
+  try {
+    const claims: unknown = JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
+    return claims && typeof claims === 'object' && !Array.isArray(claims) ? claims as Obj : null;
+  } catch { return null; }
+}

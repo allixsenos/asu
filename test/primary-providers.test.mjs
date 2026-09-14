@@ -44,7 +44,8 @@ test('Claude respects configured home, then falls back to Keychain on macOS', as
     }); },
   });
   assert.equal((await claude.resolveCredentials(local)).token, 'secret');
-  assert.deepEqual(paths, ['/custom/.credentials.json']);
+  // The credentials, then the account identity beside the settings in the same configured directory.
+  assert.deepEqual(paths, ['/custom/.credentials.json', '/custom/.claude.json']);
 });
 test('Claude request includes the required OAuth beta header', async () => {
   await claude.fetchUsage({ signal: new AbortController().signal, request: async (url, init) => {

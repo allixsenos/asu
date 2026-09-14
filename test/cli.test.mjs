@@ -10,9 +10,9 @@ import { reportSchema } from '../dist/models.js';
 
 const exec = promisify(execFile);
 const cli = resolve('dist/cli.js');
-const report = { schemaVersion: 1, asuVersion: '0.0.0-test', generatedAt: '2026-09-07T12:00:00.000Z', warnings: [], providers: [{
+const report = { schemaVersion: 2, asuVersion: '0.0.0-test', generatedAt: '2026-09-07T12:00:00.000Z', warnings: [], providers: [{
   providerId: 'example', displayName: 'Example', planLabel: 'Pro', installed: true, credentialsPresent: true,
-  authenticated: true, availability: 'available', experimental: false, reason: null, cached: false,
+  authenticated: true, availability: 'available', experimental: false, reason: null, cached: false, account: null,
   fetchedAt: '2026-09-07T12:00:00.000Z', expiresAt: '2026-09-07T12:05:00.000Z',
   windows: [{ id: 'session', label: '5 hours', percentUsed: 25, resetsAt: '2026-09-07T16:00:00.000Z' },
     { id: 'weekly', label: 'Weekly', percentUsed: 0, resetsAt: null },

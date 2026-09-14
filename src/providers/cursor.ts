@@ -4,7 +4,8 @@ import { detectCommands, homePath } from '../local.js';
 import type { LocalContext } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
-import type { Provider } from './base.js';
+import type { Login, Provider } from './base.js';
+import { firstCredentials } from './base.js';
 import { credentialObject, nonnegative, object, optionalObject, ratio, requireUsage, string, timestamp } from './parse.js';
 
 export function cursorDatabasePaths(context: LocalContext): string[] {
@@ -30,27 +31,31 @@ export const cursor: Provider = {
   id: 'cursor', displayName: 'Cursor', version: 1, experimental: true,
   detect: context => detectCommands(context, ['cursor', 'cursor-agent'],
     context.platform === 'darwin' ? ['/Applications/Cursor.app', join(context.home, 'Applications', 'Cursor.app')] : []),
-  async resolveCredentials(context) {
-    const token = string(context.env.CURSOR_ACCESS_TOKEN) ?? string(context.env.CURSOR_TOKEN);
-    if (token) return { token };
+  async listLogins(context) {
+    const logins: Login[] = [];
+    for (const name of ['CURSOR_ACCESS_TOKEN', 'CURSOR_TOKEN']) {
+      const token = string(context.env[name]);
+      if (token) logins.push({ credentials: { token }, source: name });
+    }
     let failure: unknown;
     for (const path of cursorDatabasePaths(context)) {
       try {
         const modern = await context.sqliteToken(path, 'cursorAuth/accessToken');
-        if (modern) return { token: modern };
-        const legacy = await context.sqliteToken(path, 'cursorAuthStatus');
-        if (legacy) {
-          const token = string(credentialObject(JSON.parse(legacy)).accessToken);
-          if (token) return { token };
-        }
+        const legacy = modern ? null : await context.sqliteToken(path, 'cursorAuthStatus');
+        const token = modern ?? (legacy ? string(credentialObject(JSON.parse(legacy)).accessToken) : undefined);
+        if (token) logins.push({ credentials: { token }, source: 'Cursor', inUse: true });
       } catch { failure = new UsageError('credential_read_error'); }
     }
     const config = homePath(context, context.env.XDG_CONFIG_HOME, '.config');
     const raw = await context.readJson(join(config, 'cursor', 'auth.json'));
-    if (raw != null) { const token = string(credentialObject(raw).accessToken); if (token) return { token }; }
-    if (failure) throw failure;
-    return null;
+    if (raw != null) {
+      const token = string(credentialObject(raw).accessToken);
+      if (token) logins.push({ credentials: { token }, source: 'Cursor CLI', inUse: true });
+    }
+    if (!logins.length && failure) throw failure;
+    return logins;
   },
+  resolveCredentials: context => firstCredentials(cursor.listLogins!(context)),
   async fetchUsage(context, credentials) {
     return normalizeCursor(await context.request('https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage', {
       method: 'POST', body: {}, signal: context.signal,

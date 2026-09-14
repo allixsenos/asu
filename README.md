@@ -37,6 +37,9 @@ npx --yes @allixsenos/asu@latest claude
 # Select accounts and bypass the five-minute usage cache
 npx --yes @allixsenos/asu@latest claude codex copilot --fresh --table
 
+# One account, by alias, masked label, or source
+npx --yes @allixsenos/asu@latest claude --account opencode
+
 # Include every built-in provider, even if no credentials are found
 npx --yes @allixsenos/asu@latest --all --table
 ```
@@ -53,7 +56,7 @@ This needs Git. The repository commits the built `dist/` directory, so the insta
 
 ## Real account output
 
-We fetched the snapshot below on **2026-09-13 at 11:10 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
+We fetched the snapshot below on **2026-09-14 at 10:13 UTC** from the maintainer's authenticated Claude, Codex, and GitHub Copilot accounts on Linux. These are real provider-reported figures, not fixtures or estimates. They become stale as usage changes.
 
 Each block below is the recorded output of one of these commands, run one after another from the local checkout:
 
@@ -64,7 +67,7 @@ node dist/cli.js claude codex copilot --table
 node dist/cli.js claude codex copilot --plain
 ```
 
-The first run fetched fresh figures. The other three ran inside the five-minute cache, so all four show the same figures and only the report timestamp differs. The output went to a file, so it has no colors. The examples include no credentials and no account identifiers.
+The first run fetched fresh figures. The other three ran inside the five-minute cache, so all four show the same figures and only the report timestamp differs. The output went to a file, so it has no colors. The examples include no credentials. Accounts appear only as masked labels.
 
 The bars, the table, and the plain text show reset, fetch, and expiry times relative to the moment of the run, for example `2h30m` or `45m`. A time a day or more away also names the calendar day, and the bars add the local clock time of the recording machine. A reset time that already passed shows as `now`. Pass `--utc` for full UTC timestamps. JSON always contains them.
 
@@ -73,28 +76,31 @@ The bars, the table, and the plain text show reset, fetch, and expiry times rela
 Use `--bars` for this view. It is the default in an interactive terminal. One bar per window, colored by severity in a terminal, with the countdown and the local clock after each bar. The bar shrinks in a narrow terminal, then the clock goes, and below that the default falls back to plain text.
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:10:44.216Z
+ASU 0.10.0 · 2026-09-14T10:13:52.452Z
 
-Claude · Max 20x · active · cached
-  5 hours         ━─────────────────────────    5%  resets 3h 19m · 16:30
-  Weekly          ━━━━━━━━━━━━━━━━━━━━──────   78%  resets 1d 17h · Tue 15 Sep 07:00
-  Weekly · Fable  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 1d 17h · Tue 15 Sep 07:00
-  Extra usage     Disabled
+Claude · l***@c***.guru · Max 20x · active · cached
+  via Claude Code (in use)
+  5 hours         ╸─────────────────────────    3%  resets 4h 16m · 16:30
+  Weekly          ━━━━━━━━━━━━━━━━━━━━━─────   82%  resets 18h 46m · Tue 15 Sep 07:00
+  Weekly · Fable  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 18h 46m · Tue 15 Sep 07:00
+  Extra usage     Enabled
   fetched <1m ago · cache expires in 5m
 
-Codex · Prolite · active · cached
-  Weekly                         ━─────────────────────────    4%  resets 6d 23h · Sun 20 Sep 12:37
-  GPT 5.3 Codex Spark · 5 hours  ──────────────────────────    0%  resets 4h 59m · 18:10
-  GPT 5.3 Codex Spark · Weekly   ──────────────────────────    0%  resets 6d 23h · Sun 20 Sep 12:35
-  Gpt Reserve · Weekly           ──────────────────────────    0%  resets 6d 23h · Sun 20 Sep 12:35
+Codex · d***@l.hr · Prolite · active · cached
+  via Codex CLI (in use)
+  Weekly                         ━━────────────────────────    8%  resets 6d · Sun 20 Sep 12:37
+  GPT 5.3 Codex Spark · 5 hours  ──────────────────────────    0%  resets 4h 59m · 17:13
+  GPT 5.3 Codex Spark · Weekly   ──────────────────────────    0%  resets 6d · Sun 20 Sep 12:35
+  Gpt Reserve · Weekly           ──────────────────────────    0%  resets 6d · Sun 20 Sep 12:35
   Credits                        0 credits left
   Credits available              No
   fetched <1m ago · cache expires in 5m
 
-GitHub Copilot · Individual · active · cached
-  Chat                  ──────────────────────────    0%  resets 17d 12h · Thu 1 Oct 02:00  0 / 200 requests
-  Completions           ──────────────────────────    0%  resets 17d 12h · Thu 1 Oct 02:00  0 / 2,000 requests
-  Premium Interactions  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 17d 12h · Thu 1 Oct 02:00  0 / 0 requests
+GitHub Copilot · a*** · Individual · active · cached
+  via GitHub CLI (in use)
+  Chat                  ──────────────────────────    0%  resets 16d 13h · Thu 1 Oct 02:00  0 / 200 requests
+  Completions           ──────────────────────────    0%  resets 16d 13h · Thu 1 Oct 02:00  0 / 2,000 requests
+  Premium Interactions  ━━━━━━━━━━━━━━━━━━━━━━━━━━  100%  resets 16d 13h · Thu 1 Oct 02:00  0 / 0 requests
   fetched <1m ago · cache expires in 5m
 ```
 
@@ -103,34 +109,34 @@ GitHub Copilot · Individual · active · cached
 Use `--table` for this view. When a cell would wrap, the default falls back to plain text. Pass `--table` to force the table.
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:10:44.391Z
+ASU 0.10.0 · 2026-09-14T10:13:52.633Z
 ┌──────────────────┬────────────────────┬───────────────────────┬───────────────────────┬────────────────────┐
 │ Provider         │ Plan               │ Window / balance      │ Usage                 │ Resets in          │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Claude           │ Max 20x            │ 5 hours               │ 5% used               │ 3h19m              │
-│ active           │                    │ Weekly                │ 78% used              │ 1d17h (Tue 15 Sep) │
-│ cached           │                    │ Weekly · Fable        │ 100% used             │ 1d17h (Tue 15 Sep) │
-│                  │                    │ Extra usage           │ Disabled              │ —                  │
+│ Claude           │ Max 20x            │ 5 hours               │ 3% used               │ 4h16m              │
+│ l***@c***.guru   │                    │ Weekly                │ 82% used              │ 18h46m             │
+│ active           │                    │ Weekly · Fable        │ 100% used             │ 18h46m             │
+│ cached           │                    │ Extra usage           │ Enabled               │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ Codex            │ Prolite            │ Weekly                │ 4% used               │ 6d23h (Sun 20 Sep) │
-│ active           │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 5h                 │
-│ cached           │                    │  5 hours              │                       │                    │
-│                  │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 6d23h (Sun 20 Sep) │
+│ Codex            │ Prolite            │ Weekly                │ 8% used               │ 6d (Sun 20 Sep)    │
+│ d***@l.hr        │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 5h                 │
+│ active           │                    │  5 hours              │                       │                    │
+│ cached           │                    │ GPT 5.3 Codex Spark · │ 0% used               │ 6d (Sun 20 Sep)    │
 │                  │                    │  Weekly               │                       │                    │
-│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 6d23h (Sun 20 Sep) │
+│                  │                    │ Gpt Reserve · Weekly  │ 0% used               │ 6d (Sun 20 Sep)    │
 │                  │                    │ Credits               │ 0 credits left        │ —                  │
 │                  │                    │ Credits available     │ No                    │ —                  │
 ├──────────────────┼────────────────────┼───────────────────────┼───────────────────────┼────────────────────┤
-│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 17d12h (Thu 1 Oct) │
-│ active           │                    │                       │ 0 / 200 requests      │                    │
-│ cached           │                    │ Completions           │ 0% used               │ 17d12h (Thu 1 Oct) │
-│                  │                    │                       │ 0 / 2,000 requests    │                    │
-│                  │                    │ Premium Interactions  │ 100% used             │ 17d12h (Thu 1 Oct) │
+│ GitHub Copilot   │ Individual         │ Chat                  │ 0% used               │ 16d13h (Thu 1 Oct) │
+│ a***             │                    │                       │ 0 / 200 requests      │                    │
+│ active           │                    │ Completions           │ 0% used               │ 16d13h (Thu 1 Oct) │
+│ cached           │                    │                       │ 0 / 2,000 requests    │                    │
+│                  │                    │ Premium Interactions  │ 100% used             │ 16d13h (Thu 1 Oct) │
 │                  │                    │                       │ 0 / 0 requests        │                    │
 └──────────────────┴────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
-Claude: fetched <1m ago; cache expires in 5m.
-Codex: fetched <1m ago; cache expires in 5m.
-GitHub Copilot: fetched <1m ago; cache expires in 5m.
+Claude (l***@c***.guru) via Claude Code (in use): fetched <1m ago; cache expires in 5m.
+Codex (d***@l.hr) via Codex CLI (in use): fetched <1m ago; cache expires in 5m.
+GitHub Copilot (a***) via GitHub CLI (in use): fetched <1m ago; cache expires in 5m.
 ```
 
 Read Copilot's premium row with care. The endpoint returned zero entitlement, zero remaining requests, and zero percent remaining. ASU therefore shows `100% used` next to `0 / 0 requests`. This does **not** show that anyone consumed a premium request. The internal endpoint can return legacy quota information. Treat its quantities as the provider's reported snapshot, not as a complete billing statement.
@@ -143,34 +149,40 @@ Use `--plain` for readable output in logs and pipes. It is the default when stdo
 <summary>Show the complete plain-text output</summary>
 
 ```text
-ASU 0.9.0 · 2026-09-13T11:10:44.559Z
+ASU 0.10.0 · 2026-09-14T10:13:52.805Z
 
 Claude (claude)
   active
+  Account: l***@c***.guru
+  Via: Claude Code (in use)
   Plan: Max 20x
-  5 hours: 5% used; resets in 3h19m
-  Weekly: 78% used; resets in 1d17h (Tue 15 Sep)
-  Weekly · Fable: 100% used; resets in 1d17h (Tue 15 Sep)
-  Extra usage: Disabled
+  5 hours: 3% used; resets in 4h16m
+  Weekly: 82% used; resets in 18h46m
+  Weekly · Fable: 100% used; resets in 18h46m
+  Extra usage: Enabled
   Fetched <1m ago; cached; expires in 5m
 
 Codex (codex)
   active
+  Account: d***@l.hr
+  Via: Codex CLI (in use)
   Plan: Prolite
-  Weekly: 4% used; resets in 6d23h (Sun 20 Sep)
+  Weekly: 8% used; resets in 6d (Sun 20 Sep)
   GPT 5.3 Codex Spark · 5 hours: 0% used; resets in 5h
-  GPT 5.3 Codex Spark · Weekly: 0% used; resets in 6d23h (Sun 20 Sep)
-  Gpt Reserve · Weekly: 0% used; resets in 6d23h (Sun 20 Sep)
+  GPT 5.3 Codex Spark · Weekly: 0% used; resets in 6d (Sun 20 Sep)
+  Gpt Reserve · Weekly: 0% used; resets in 6d (Sun 20 Sep)
   Credits: 0 credits left
   Credits available: No
   Fetched <1m ago; cached; expires in 5m
 
 GitHub Copilot (copilot)
   active
+  Account: a***
+  Via: GitHub CLI (in use)
   Plan: Individual
-  Chat: 0% used; 0 / 200 requests; resets in 17d12h (Thu 1 Oct)
-  Completions: 0% used; 0 / 2,000 requests; resets in 17d12h (Thu 1 Oct)
-  Premium Interactions: 100% used; 0 / 0 requests; resets in 17d12h (Thu 1 Oct)
+  Chat: 0% used; 0 / 200 requests; resets in 16d13h (Thu 1 Oct)
+  Completions: 0% used; 0 / 2,000 requests; resets in 16d13h (Thu 1 Oct)
+  Premium Interactions: 100% used; 0 / 0 requests; resets in 16d13h (Thu 1 Oct)
   Fetched <1m ago; cached; expires in 5m
 ```
 
@@ -181,13 +193,13 @@ GitHub Copilot (copilot)
 Use `--json` for agents and scripts. Stdout contains the report. An ASU invocation error goes to stderr. The human output rounds quantities to two decimal places and shows relative times. JSON keeps the normalized numeric precision and the full UTC timestamps.
 
 <details>
-<summary>Show the complete version 1 JSON report</summary>
+<summary>Show the complete version 2 JSON report</summary>
 
 ```json
 {
-  "schemaVersion": 1,
-  "asuVersion": "0.9.0",
-  "generatedAt": "2026-09-13T11:10:44.042Z",
+  "schemaVersion": 2,
+  "asuVersion": "0.10.0",
+  "generatedAt": "2026-09-14T10:13:52.260Z",
   "warnings": [],
   "providers": [
     {
@@ -196,13 +208,13 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
         {
           "id": "five_hour",
           "label": "5 hours",
-          "percentUsed": 5,
-          "resetsAt": "2026-09-13T14:30:01.000Z"
+          "percentUsed": 3,
+          "resetsAt": "2026-09-14T14:30:01.000Z"
         },
         {
           "id": "seven_day",
           "label": "Weekly",
-          "percentUsed": 78,
+          "percentUsed": 82,
           "resetsAt": "2026-09-15T05:00:01.000Z"
         },
         {
@@ -219,7 +231,7 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "details": [
         {
           "label": "Extra usage",
-          "value": "Disabled"
+          "value": "Enabled"
         }
       ],
       "providerId": "claude",
@@ -230,8 +242,18 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:10:43.895Z",
-      "expiresAt": "2026-09-13T11:15:43.895Z",
+      "account": {
+        "id": "claude:a3aae40f",
+        "label": "l***@c***.guru",
+        "sources": [
+          {
+            "name": "Claude Code",
+            "inUse": true
+          }
+        ]
+      },
+      "fetchedAt": "2026-09-14T10:13:52.160Z",
+      "expiresAt": "2026-09-14T10:18:52.160Z",
       "cached": false
     },
     {
@@ -240,14 +262,14 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
         {
           "id": "usage-primary_window",
           "label": "Weekly",
-          "percentUsed": 4,
+          "percentUsed": 8,
           "resetsAt": "2026-09-20T10:37:55.000Z"
         },
         {
           "id": "additional-0-gpt-5-3-codex-spark-primary_window",
           "label": "GPT 5.3 Codex Spark · 5 hours",
           "percentUsed": 0,
-          "resetsAt": "2026-09-13T16:10:44.000Z"
+          "resetsAt": "2026-09-14T15:13:52.000Z"
         },
         {
           "id": "additional-0-gpt-5-3-codex-spark-secondary_window",
@@ -285,8 +307,18 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:10:44.041Z",
-      "expiresAt": "2026-09-13T11:15:44.041Z",
+      "account": {
+        "id": "codex:10af7872",
+        "label": "d***@l.hr",
+        "sources": [
+          {
+            "name": "Codex CLI",
+            "inUse": true
+          }
+        ]
+      },
+      "fetchedAt": "2026-09-14T10:13:52.256Z",
+      "expiresAt": "2026-09-14T10:18:52.256Z",
       "cached": false
     },
     {
@@ -333,8 +365,18 @@ Use `--json` for agents and scripts. Stdout contains the report. An ASU invocati
       "authenticated": true,
       "availability": "available",
       "reason": null,
-      "fetchedAt": "2026-09-13T11:10:43.927Z",
-      "expiresAt": "2026-09-13T11:15:43.927Z",
+      "account": {
+        "id": "copilot:b8b76928",
+        "label": "a***",
+        "sources": [
+          {
+            "name": "GitHub CLI",
+            "inUse": true
+          }
+        ]
+      },
+      "fetchedAt": "2026-09-14T10:13:52.078Z",
+      "expiresAt": "2026-09-14T10:18:52.078Z",
       "cached": false
     }
   ]
@@ -359,6 +401,8 @@ When you run ASU through `npx`, put the ASU options after the package name.
 | `claude codex` | Select providers by their bare names, in any position. `asu claude --plain` and `asu --plain claude` are the same. |
 | `--provider claude,codex` | The same selection as a flag. Repeat the flag or separate the IDs with commas. |
 | `--all` | Include providers with no detected installation or credentials |
+| `--account SELECTOR` | Keep only accounts that match an alias, a masked label, an email, an account ID, or a source name such as `opencode` |
+| `--show-email` | Show full email addresses instead of masked labels, in that run's output only |
 | `--fresh` | Bypass cached usage. Concurrent fresh requests still share one fetch. |
 | `--no-cache` | Do not read or write the persistent cache |
 | `--cache-dir PATH` | Set the usage cache directory |
@@ -391,13 +435,14 @@ jq '[.providers[]
   | .providerId]' usage.json
 ```
 
-A consumer must examine `schemaVersion` before it processes a report. Version 1 includes:
+A consumer must examine `schemaVersion` before it processes a report. Version 2 includes:
 
 | Field | Meaning |
 | --- | --- |
 | `asuVersion` | The ASU package version that wrote the report. The plain and table headers show it too. |
 | `generatedAt`, `warnings`, `providers` | Report timestamp, shared warnings, and independent provider results |
-| `providerId`, `displayName`, `experimental` | Provider identity and live-validation status |
+| `providerId`, `displayName`, `experimental` | Provider identity and live-validation status. One provider appears once per account. |
+| `account` | The login behind the result: a stable `id`, a masked `label`, and the `sources` it was found in, each with `inUse`. `email` appears only with `--show-email`. `null` when no login was found. |
 | `installed`, `credentialsPresent`, `authenticated` | Separate discovery and authentication observations |
 | `availability`, `reason` | `available`, `unavailable`, or `error`, with a reason code and a safe message when needed |
 | `planLabel` | Subscription label, or `null` if unknown |
@@ -406,20 +451,20 @@ A consumer must examine `schemaVersion` before it processes a report. Version 1 
 | `details` | Additional normalized label and value pairs |
 | `fetchedAt`, `expiresAt`, `cached` | Timestamp and freshness of each provider snapshot |
 
-An unknown percentage or reset time is `null`. A missing quantity or balance does not mean zero. An unlimited allowance is explicit. A percentage can exceed 100 if a provider reports overage. Do not assume a fixed number or order of windows. See the [report contract](docs/architecture.md#report-contract) and the [schemas](src/models.ts) for the full model. An agent that wants to watch its own budget can follow [Use ASU from an agent](docs/agent-usage.md). The [asu-usage skill](skills/asu-usage/SKILL.md) measures what one command costs, and `npx skills add allixsenos/asu` installs it.
+An unknown percentage or reset time is `null`. A missing quantity or balance does not mean zero. An unlimited allowance is explicit. A percentage can exceed 100 if a provider reports overage. Do not assume a fixed number or order of windows. A provider can appear several times, once per account, so group results by `providerId` and `account.id` rather than by position. See the [report contract](docs/architecture.md#report-contract) and the [schemas](src/models.ts) for the full model. An agent that wants to watch its own budget can follow [Use ASU from an agent](docs/agent-usage.md). The [asu-usage skill](skills/asu-usage/SKILL.md) measures what one command costs, and `npx skills add allixsenos/asu` installs it.
 
 ## Supported providers
 
-| ID | Provider | Credential sources, in precedence order | Validation |
+| ID | Provider | Credential sources | Validation |
 | --- | --- | --- | --- |
-| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`. macOS Keychain fallback. | Live account, Linux |
-| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json` | Live account, Linux |
-| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, GitHub CLI `hosts.yml` | Live account, Linux |
+| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`, with the identity from `.claude.json`. macOS Keychain. opencode `anthropic`. | Live account, Linux. opencode fixture tests only. |
+| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json`, opencode `openai` | Live account, Linux. opencode fixture tests only. |
+| `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, every account in GitHub CLI `hosts.yml`, opencode `github-copilot` | Live account, Linux. opencode fixture tests only. |
 | `cursor` | Cursor | `CURSOR_ACCESS_TOKEN`, `CURSOR_TOKEN`, desktop SQLite, `~/.config/cursor/auth.json` | Experimental. Fixture tests only. |
-| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY` | Experimental. Fixture tests only. |
-| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json` | Experimental. Fixture tests only. |
-| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME` or `~/.kimi-code`, legacy `~/.kimi` | Experimental. Fixture tests only. |
-| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json` | Experimental. Fixture tests only. |
+| `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY`, opencode `zai-coding-plan` | Experimental. Fixture tests only. |
+| `grok` | Grok | `GROK_API_KEY`, `GROK_TOKEN`, `~/.grok/auth.json`, opencode `xai` | Experimental. Fixture tests only. |
+| `kimi` | Kimi | `KIMI_TOKEN`, `KIMI_API_KEY`, credentials under `$KIMI_CODE_HOME`, `~/.kimi-code`, and legacy `~/.kimi`, opencode `kimi-for-coding` | Experimental. Fixture tests only. |
+| `minimax` | MiniMax | `MINIMAX_API_KEY`, `~/.mmx/credentials.json`, `~/.mmx/config.json`, opencode `minimax-coding-plan` and `minimax-cn-coding-plan` | Experimental. Fixture tests only. |
 
 Only Claude Max 20x, Codex Plus, and GitHub Copilot Individual passed a check against the maintainer's live accounts. The other five adapters always return `experimental: true`, and the human output marks them. A passed fixture test does not prove a live subscription or every credential-store variant. The macOS and Windows paths have no live test.
 
@@ -431,6 +476,13 @@ Credential lookup details:
 - Cursor reads its desktop `state.vscdb` in read-only mode. It uses the platform locations, including macOS Application Support and Windows `APPDATA`. The Linux lookup obeys `XDG_CONFIG_HOME`.
 - Kimi's credential file is `credentials/kimi-code.json` under its configured or default home.
 - MiniMax supports `MINIMAX_REGION=cn` or a recognized `MINIMAX_BASE_URL`. ASU rejects an arbitrary API destination.
+- opencode keeps its logins in `$XDG_DATA_HOME/opencode/auth.json`, or `~/.local/share/opencode/auth.json`, on every platform.
+
+### Accounts
+
+ASU reads every credential store on every run and reports each login as an account. Claude Code can use one Claude subscription while opencode uses another, and ASU reports both. Logins merge into one account when they share an account identity, such as a Claude account UUID or a Codex account ID, or the same token. A login with neither, such as an opencode Claude login, stays its own account and shows only where it came from. Accounts that a tool uses right now come first, and the `via` line names the tools.
+
+Each account shows the alias it was given, or else a masked email such as `j***@e***.org`. Pass `--show-email` to see the full address. Pass `--account` to select one account.
 
 The APIs include undocumented internal endpoints and can change. The request methods, schemas, primary sources, and limitations of each adapter are in [provider contracts](docs/provider-contracts.md).
 
@@ -467,6 +519,8 @@ An HTTP request has an eight-second deadline, a one-MiB response limit, and no r
 
 ### Credential handling
 
+ASU masks every email it shows, so `jane@example.org` becomes `j***@e***.org`. The full email appears only with `--show-email`, only in that run's output, and never in the cache, a log, or an error message.
+
 ASU reads existing credentials and sends them only to the provider endpoint of the adapter. It never refreshes a token, signs in, rewrites a provider file, runs the provider CLI to get usage, or estimates subscription consumption from conversation history. Missing or rejected credentials give an unavailable result. Sign in or refresh through the provider's own CLI.
 
 Once a day, after the report, ASU asks the npm registry for its own newest version and prints one line on stderr when a newer one exists. The request carries only the package name, and the answer is kept in the cache directory. `--no-cache`, `ASU_NO_UPDATE_CHECK=1`, `NO_UPDATE_NOTIFIER=1`, or `CI=true` turns the check off. This is the only request ASU makes to anything other than a provider.
@@ -481,6 +535,7 @@ ASU prints and caches only normalized usage. It excludes tokens, refresh tokens,
 | The Git install fails during `prepare` | Examine the Node version, the dependency-registry access, and whether npm permits build scripts. See the local checkout instructions below. |
 | `npx` exits with code 1 and prints nothing, or npm 9 reports `could not determine executable to run` | npm 9 cannot run the nested install that a Git dependency with a `build` or `prepare` script needs through `npx`. ASU commits `dist/` and has neither script, so a current checkout does not hit this. Clear the npx cache with `rm -rf ~/.npm/_npx` and retry, or use the release tarball URL. |
 | No supported agents or credentials detected | Use `--all`, examine the credential sources above, and examine the home-directory overrides and `PATH`. |
+| `token_expired`, shown as `token expired` | The stored token is past its expiry. ASU never refreshes tokens. Use the tool named on the `via` line so it refreshes the token, then run ASU with `--fresh`. |
 | `missing_credentials`, `invalid_credentials`, or `unauthorized` | Sign in or refresh through the provider's CLI, then run ASU again with `--fresh`. A successful CLI login helps only if ASU supports its credential store. |
 | `credential_read_error` | Make sure that your current user can read the credential file or store. |
 | `timeout`, `rate_limited`, or `http_error` | Examine the connectivity and the provider status. Wait before you retry after a rate limit. Use `--fresh` to bypass a cached failure. |

@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { Provider } from './providers/base.js';
+import type { LoginSource, Provider } from './providers/base.js';
 import { claude } from './providers/claude.js';
 import { codex } from './providers/codex.js';
 import { copilot } from './providers/copilot.js';
@@ -10,15 +10,19 @@ import { zai } from './providers/zai.js';
 import { grok } from './providers/grok.js';
 import { kimi } from './providers/kimi.js';
 import { minimax } from './providers/minimax.js';
+import { opencodeSource } from './sources/opencode.js';
 
 export const builtInProviders: readonly Provider[] = [claude, codex, copilot, cursor, zai, grok, kimi, minimax];
+/** Credential stores shared by several tools. Each one is read on every run, next to the providers' own stores. */
+export const builtInSources: readonly LoginSource[] = [opencodeSource];
 export function validateProvider(value: unknown): Provider {
   if (!value || typeof value !== 'object') throw new Error('Invalid provider plugin');
   const p = value as Partial<Provider>;
   if (typeof p.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,47}$/.test(p.id)
     || typeof p.displayName !== 'string' || !/^[\p{L}\p{N} ._-]{1,80}$/u.test(p.displayName)
     || !Number.isSafeInteger(p.version) || (p.version ?? 0) < 1
-    || typeof p.detect !== 'function' || typeof p.resolveCredentials !== 'function' || typeof p.fetchUsage !== 'function'
+    || typeof p.detect !== 'function' || typeof p.fetchUsage !== 'function'
+    || (typeof p.listLogins !== 'function' && typeof p.resolveCredentials !== 'function')
     || (p.experimental !== undefined && typeof p.experimental !== 'boolean')) throw new Error('Invalid provider plugin');
   return value as Provider;
 }

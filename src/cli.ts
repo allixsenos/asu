@@ -20,6 +20,7 @@ Usage: asu [usage] [provider...] [options]
   asu                        Every detected provider
   asu claude                 One provider, by its bare name
   asu claude codex --plain   Several providers, with options anywhere
+  asu claude --account work  One account, by alias, masked label, email, ID, or source
 
   --format plain|table|bars|json
                              Output format (bars in a terminal, plain when piped or when a line would wrap)
@@ -30,6 +31,8 @@ Usage: asu [usage] [provider...] [options]
   --utc                      Print full UTC timestamps instead of times relative to now
   --provider <id>             Select provider; same as a bare name, repeat or use comma-separated IDs
   --all                      Include providers with no detected install or credentials
+  --account <selector>        Keep only accounts matching an alias, masked label, email, account ID, or source
+  --show-email               Show full email addresses instead of masked labels. Never cached.
   --fresh                    Fetch again, bypassing the five-minute cache
   --no-cache                 Do not read or write the persistent cache
   --cache-dir <path>          Override the private usage cache directory
@@ -39,7 +42,8 @@ Usage: asu [usage] [provider...] [options]
 
 Providers: claude, codex, copilot, cursor, zai, grok, kimi, minimax
 Credentials are read-only. Sign in and refresh tokens through the provider CLI.
-JSON has schemaVersion: 1. Diagnostics go to stderr; stdout contains only the report.
+Every login is reported once per account, merged across Claude Code, Codex CLI, GitHub CLI, opencode, and env vars.
+JSON has schemaVersion: 2. Diagnostics go to stderr; stdout contains only the report.
 Exit codes: 0 at least one available provider; 1 none available; 2 invocation error.
 `;
 
@@ -50,6 +54,7 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
       format: { type: 'string' }, json: { type: 'boolean' }, plain: { type: 'boolean' }, table: { type: 'boolean' }, bars: { type: 'boolean' }, utc: { type: 'boolean' },
       provider: { type: 'string', multiple: true }, all: { type: 'boolean' }, fresh: { type: 'boolean' },
       'no-cache': { type: 'boolean' }, 'cache-dir': { type: 'string' }, plugin: { type: 'string', multiple: true },
+      account: { type: 'string' }, 'show-email': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' },
     } });
     if (values.help) { process.stdout.write(help); return 0; }
@@ -68,7 +73,8 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
     const cacheRoot = homePath(local, local.env.XDG_CACHE_HOME, '.cache');
     const directory = homePath(local, values['cache-dir'] ?? local.env.ASU_CACHE_DIR, `${cacheRoot}/asu`);
     const service = new UsageService(providers, { local, cache: new UsageCache(values['no-cache'] ? undefined : directory) });
-    const report = await service.collect({ providerIds, fresh: values.fresh });
+    const report = await service.collect({ providerIds, fresh: values.fresh, account: values.account, showEmail: values['show-email'] });
+    if (values.account !== undefined && !report.providers.length) throw new Error('No account matches --account. Run asu without it to see the account labels.');
     if (!values.all && !providerIds?.length) report.providers = report.providers.filter(provider =>
       provider.installed || provider.credentialsPresent || provider.reason?.code !== 'missing_credentials');
     const options = { columns: process.stdout.columns, utc: values.utc, color: Boolean(process.stdout.isTTY && !process.env.NO_COLOR) };
@@ -86,7 +92,8 @@ export async function run(args = process.argv.slice(2)): Promise<number> {
   } catch (error) {
     // All errors exposed here are ours; do not print plugin/import/runtime exception messages.
     const messages = ['Choose one output format: plain, table, bars, or json.',
-      'Unknown provider ID. See --help for built-ins.', 'Could not load a provider plugin. Check its path, exports, and unique provider ID.'];
+      'Unknown provider ID. See --help for built-ins.', 'Could not load a provider plugin. Check its path, exports, and unique provider ID.',
+      'No account matches --account. Run asu without it to see the account labels.'];
     const message = error instanceof Error && messages.includes(error.message) ? error.message : 'Could not run ASU. Check arguments and plugin configuration; see --help.';
     process.stderr.write(`asu: ${message}\n`);
     return 2;

@@ -4,7 +4,8 @@ import { UsageError } from '../errors.js';
 import { detectCommands, homePath } from '../local.js';
 import { emptyUsage } from '../models.js';
 import type { UsageData } from '../models.js';
-import type { Provider } from './base.js';
+import type { Login, Provider } from './base.js';
+import { firstCredentials } from './base.js';
 import { credentialObject, nonnegative, object, optionalObject, percent, ratio, requireUsage, slug, string, timestamp, title } from './parse.js';
 
 export function normalizeCopilot(payload: unknown): UsageData {
@@ -31,24 +32,38 @@ export const copilot: Provider = {
   id: 'copilot', displayName: 'GitHub Copilot', version: 2,
   // gh alone is not proof that Copilot is installed.
   detect: context => detectCommands(context, ['copilot', 'github-copilot']),
-  async resolveCredentials(context) {
-    const envToken = string(context.env.COPILOT_TOKEN) ?? string(context.env.GITHUB_TOKEN) ?? string(context.env.GITHUB_PAT);
-    if (envToken) return { token: envToken };
+  async listLogins(context) {
+    const logins: Login[] = [];
+    for (const name of ['COPILOT_TOKEN', 'GITHUB_TOKEN', 'GITHUB_PAT']) {
+      const token = string(context.env[name]);
+      if (token) logins.push({ credentials: { token }, source: name });
+    }
     const config = homePath(context, context.env.GH_CONFIG_DIR,
       context.env.XDG_CONFIG_HOME ? join(context.env.XDG_CONFIG_HOME, 'gh') : '.config/gh');
     const text = await context.readText(join(config, 'hosts.yml'));
-    if (text === null) return null;
+    if (text === null) return logins;
     try {
       const root = credentialObject(parse(text, { maxAliasCount: 0 }));
-      if (!root['github.com']) return null;
+      if (!root['github.com']) return logins;
       const github = credentialObject(root['github.com']);
-      const user = string(github.user);
+      const active = string(github.user);
       const users = github.users == null ? {} : credentialObject(github.users);
-      const current = user && users[user] ? credentialObject(users[user]) : {};
-      const token = string(github.oauth_token) ?? string(current.oauth_token);
-      return token ? { token } : null;
+      // gh keeps every signed-in account under `users`, and the active account's token also at the top level.
+      const entries: Array<[string | undefined, unknown]> = [[active, github.oauth_token],
+        ...Object.entries(users).map(([user, value]): [string, unknown] => [user, credentialObject(value).oauth_token])];
+      const found: Login[] = [];
+      for (const [user, value] of entries) {
+        const token = string(value);
+        if (!token) continue;
+        found.push({ credentials: { token }, source: 'GitHub CLI', inUse: user === active,
+          accountKey: user ? `github.com/${user}` : undefined, handle: user });
+      }
+      // The active account first, so a caller that wants one login gets the one gh uses.
+      found.sort((a, b) => Number(b.inUse === true) - Number(a.inUse === true));
+      return [...logins, ...found];
     } catch { throw new UsageError('invalid_credentials'); }
   },
+  resolveCredentials: context => firstCredentials(copilot.listLogins!(context)),
   async fetchUsage(context, credentials) {
     return normalizeCopilot(await context.request('https://api.github.com/copilot_internal/user', {
       signal: context.signal, headers: { Authorization: `token ${credentials.token}`,
