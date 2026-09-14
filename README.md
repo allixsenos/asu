@@ -457,8 +457,8 @@ An unknown percentage or reset time is `null`. A missing quantity or balance doe
 
 | ID | Provider | Credential sources | Validation |
 | --- | --- | --- | --- |
-| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`, with the identity from `.claude.json`. macOS Keychain. opencode `anthropic`. | Live account, Linux. opencode fixture tests only. |
-| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json`, opencode `openai` | Live account, Linux. opencode fixture tests only. |
+| `claude` | Claude | `.credentials.json` under `$CLAUDE_CONFIG_DIR`, `$CLAUDE_HOME`, or `~/.claude`, with the identity from `.claude.json`. macOS Keychain. opencode `anthropic`. ccswap slots and `ccswap run` profiles. | Live account, Linux. opencode fixture tests only. |
+| `codex` | Codex | `$CODEX_HOME/auth.json`, `~/.config/codex/auth.json`, `~/.codex/auth.json`, opencode `openai`, ccswap slots | Live account, Linux. opencode fixture tests only. |
 | `copilot` | GitHub Copilot | `COPILOT_TOKEN`, `GITHUB_TOKEN`, `GITHUB_PAT`, every account in GitHub CLI `hosts.yml`, opencode `github-copilot` | Live account, Linux. opencode fixture tests only. |
 | `cursor` | Cursor | `CURSOR_ACCESS_TOKEN`, `CURSOR_TOKEN`, desktop SQLite, `~/.config/cursor/auth.json` | Experimental. Fixture tests only. |
 | `zai` | Z.ai | `ZAI_API_KEY`, `GLM_API_KEY`, opencode `zai-coding-plan` | Experimental. Fixture tests only. |
@@ -477,10 +477,11 @@ Credential lookup details:
 - Kimi's credential file is `credentials/kimi-code.json` under its configured or default home.
 - MiniMax supports `MINIMAX_REGION=cn` or a recognized `MINIMAX_BASE_URL`. ASU rejects an arbitrary API destination.
 - opencode keeps its logins in `$XDG_DATA_HOME/opencode/auth.json`, or `~/.local/share/opencode/auth.json`, on every platform.
+- ccswap keeps its accounts in `$XDG_DATA_HOME/claude-swap`, or `~/.local/share/claude-swap`, on Linux, and in `~/.claude-swap-backup` on macOS and Windows. On macOS, when a Claude slot has no backup file, ASU reads that slot's own Keychain item and no other.
 
 ### Accounts
 
-ASU reads every credential store on every run and reports each login as an account. Claude Code can use one Claude subscription while opencode uses another, and ASU reports both. Logins merge into one account when they share an account identity, such as a Claude account UUID or a Codex account ID, or the same token. A login with neither, such as an opencode Claude login, stays its own account and shows only where it came from. Accounts that a tool uses right now come first, and the `via` line names the tools.
+ASU reads every credential store on every run and reports each login as an account. Claude Code can use one Claude subscription while opencode uses another, and ASU reports both. Every Claude and Codex account that ccswap manages is a source too, one per slot, together with the profile `ccswap run` made for it. Logins merge into one account when they share an account identity, such as a Claude account UUID or a Codex account ID, or the same token. A login with neither, such as an opencode Claude login, stays its own account and shows only where it came from. Accounts that a tool uses right now come first, and the `via` line names the tools.
 
 Each account shows the alias it was given, or else a masked email such as `j***@e***.org`. Pass `--show-email` to see the full address. Pass `--account` to select one account.
 

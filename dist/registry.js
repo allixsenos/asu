@@ -10,9 +10,10 @@ import { grok } from './providers/grok.js';
 import { kimi } from './providers/kimi.js';
 import { minimax } from './providers/minimax.js';
 import { opencodeSource } from './sources/opencode.js';
+import { ccswapSource } from './sources/ccswap.js';
 export const builtInProviders = [claude, codex, copilot, cursor, zai, grok, kimi, minimax];
 /** Credential stores shared by several tools. Each one is read on every run, next to the providers' own stores. */
-export const builtInSources = [opencodeSource];
+export const builtInSources = [opencodeSource, ccswapSource];
 export function validateProvider(value) {
     if (!value || typeof value !== 'object')
         throw new Error('Invalid provider plugin');

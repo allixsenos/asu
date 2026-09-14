@@ -40,7 +40,7 @@ Usage: asu [usage] [provider...] [options]
 
 Providers: claude, codex, copilot, cursor, zai, grok, kimi, minimax
 Credentials are read-only. Sign in and refresh tokens through the provider CLI.
-Every login is reported once per account, merged across Claude Code, Codex CLI, GitHub CLI, opencode, and env vars.
+Every login is reported once per account, merged across Claude Code, Codex CLI, GitHub CLI, opencode, ccswap, and env vars.
 JSON has schemaVersion: 2. Diagnostics go to stderr; stdout contains only the report.
 Exit codes: 0 at least one available provider; 1 none available; 2 invocation error.
 `;

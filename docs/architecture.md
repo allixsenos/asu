@@ -39,7 +39,7 @@ The service runs the provider functions concurrently. Each result and each failu
 
 ## Login sources and accounts
 
-A `Login` holds the credentials, the `source` it came from, whether that tool uses it now (`inUse`), and optional identity: an `accountKey` such as an account UUID, an `email`, a `handle`, or an `alias`. A `LoginSource` is a store shared by several tools, such as opencode, that returns logins for several providers.
+A `Login` holds the credentials, the `source` it came from, whether that tool uses it now (`inUse`), and optional identity: an `accountKey` such as an account UUID, an `email`, a `handle`, or an `alias`. A `LoginSource` is a store shared by several tools, such as opencode or ccswap, that returns logins for several providers.
 
 On each run the service reads every `LoginSource` once and every provider's `listLogins`, in parallel. A shared store that fails becomes a report warning and hides no other login. For each provider, the service merges logins that share an `accountKey` or a token into one account, keeps the sources of all of them, and uses the credentials that expire last. A login without an identity stays its own account. The service fetches each account once, in-use accounts first.
 

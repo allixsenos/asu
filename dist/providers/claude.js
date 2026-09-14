@@ -104,7 +104,8 @@ export function normalizeClaude(payload, metadata = {}) {
     }
     return data;
 }
-function parseCredentials(raw) {
+/** Claude Code's credential file shape. Exported for the ccswap source, whose backups are copies of it. */
+export function parseCredentials(raw) {
     const root = credentialObject(raw);
     if (root.claudeAiOauth == null)
         return null;

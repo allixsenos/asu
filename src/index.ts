@@ -3,6 +3,7 @@ export type { UsageData, ProviderUsage, UsageReport, UsageWindow, Balance, Accou
 export type { CollectOptions, ServiceOptions } from './service.js';
 export { maskEmail } from './accounts.js';
 export { opencodeSource } from './sources/opencode.js';
+export { ccswapSource } from './sources/ccswap.js';
 export type { LocalContext } from './local.js';
 export type { RequestJson, JsonRequest } from './transport.js';
 export { usageDataSchema, providerUsageSchema, reportSchema, accountSchema, emptyUsage } from './models.js';

@@ -37,7 +37,27 @@ ASU reads the file on every run as a source of its own, next to each provider's 
 
 ASU skips a pay-as-you-go `zai` key, a `moonshotai` platform key, and an `openai` API key, because those have no subscription usage. opencode refreshes OAuth tokens in place. ASU does not, so an expired entry reports `token_expired`.
 
+## ccswap accounts
+
+We checked ccswap [v0.31.0](https://github.com/errhythm/cc-swap/tree/v0.31.0) on 2026-09-14, against its source and the installed package. ccswap manages several Claude and Codex accounts and swaps one of them into the live login. ASU reads its store read-only and lists every slot as a login.
+
+| File | Content | ASU reads |
+| --- | --- | --- |
+| `sequence.json` | Claude slots: `accounts.<N>` with `email`, `uuid`, `organizationUuid`, and an optional `alias` | The slot list, the identity `uuid:organizationUuid`, the email for the masked label, and the alias |
+| `credentials/.creds-<N>-<email>.enc` | Base64 of a Claude Code `.credentials.json` | The OAuth token, its expiry, and the plan metadata |
+| Keychain service `claude-swap`, account `account-<N>-<email>` | macOS only. The same JSON. | Only that exact item, and only when the `.enc` file is absent, as in ccswap |
+| `sessions/<N>-<slug>/.credentials.json` | The profile `ccswap run` made for slot `<N>` | A second login for that slot, which usually holds a fresher token |
+| `codex/sequence.json` | Codex slots with `email` and `accountId` | The slot list and the identity |
+| `codex/credentials/account-<N>.json` | A verbatim copy of Codex CLI's `auth.json` | The access token and the account ID |
+
+The root is `$XDG_DATA_HOME/claude-swap` on Linux when that path is absolute, else `~/.local/share/claude-swap`. On macOS and Windows it is `~/.claude-swap-backup`. Sources: [`paths.py`](https://github.com/errhythm/cc-swap/blob/v0.31.0/src/claude_swap/paths.py), [`credentials.py`](https://github.com/errhythm/cc-swap/blob/v0.31.0/src/claude_swap/credentials.py), [`session.py`](https://github.com/errhythm/cc-swap/blob/v0.31.0/src/claude_swap/session.py), [`codex.py`](https://github.com/errhythm/cc-swap/blob/v0.31.0/src/claude_swap/codex.py).
+
+ASU marks no ccswap slot as in use. The account that ccswap swapped in is already the live Claude Code or Codex CLI login, and it merges with that login by identity. ASU never refreshes the token of an inactive slot. A refresh from ASU could race a refresh from ccswap and invalidate the login. As a result, an inactive Claude slot often reports `token_expired`.
+
 ## Known limitations
+
+- We tested the ccswap source with fixtures and with one live Linux store that holds one Claude account and one Codex account. The macOS Keychain path has fixture tests only. A store with several slots per provider has fixture tests only.
+- On macOS, the Keychain lookup for a ccswap slot gives the item's account name, which contains the email, to the `security` command. Other local users can see that name in the process list while the command runs. ASU never writes it to the output, the cache, or a log.
 
 - opencode logins have fixture tests only. No opencode login was available for a live check. Three points are unverified: whether `copilot_internal/user` accepts opencode's `read:user` GitHub token, whether the Grok CLI billing endpoint accepts opencode's `xai` token, and whether an `anthropic` entry matches Claude Code's OAuth client. opencode removed its built-in Anthropic login in 1.3.0, so only older setups or third-party plugins write that entry.
 - opencode v2 moves credentials into a SQLite database. v2 is a tag, not a release, and ASU does not read it yet.
